@@ -1,0 +1,51 @@
+.containerCentral{
+    background-color: #e5e5f7;
+    opacity: 0.8;
+    background-image:  linear-gradient(#444cf7 2px, transparent 2px), linear-gradient(90deg, #444cf7 2px, transparent 2px), linear-gradient(#444cf7 1px, transparent 1px), linear-gradient(90deg, #444cf7 1px, #e5e5f7 1px);
+    background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+    background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+    min-height: 689px;
+    min-width: 600px;
+
+}
+
+footer {
+    margin-top: auto; /* Empuja el footer hacia abajo para que se pegue al fondo */
+    background-color: lightgrey; /* Color de fondo del footer */
+    color: #fff; /* Color de texto del footer */
+    padding: 10px; /* Espaciado interior del footer */
+}
+
+.contenidoTienda{
+    min-width: 100%;
+}
+
+
+.isleta{
+    background-color: green;
+    width: 100px;
+    height: 100px;
+    margin: 10px;
+    overflow: hidden;
+}
+
+.coordenadas{
+    color: white;
+}
+
+
+.titule{
+    color: white;
+}
+
+.zona{
+    background-color: rgba(255, 255, 0, 0.366);
+    width: 500px;
+    height: 500px;
+    position: fixed;
+}
+
+#ul{
+    overflow-y: scroll;
+    height: 400px;
+}
