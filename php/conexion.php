@@ -46,11 +46,15 @@ if (isset($_POST['option'])) {
                 $height = $_POST['height'];
                 $width = $_POST['width'];
                 $id = $_POST['id'];
-                $sql = "UPDATE $tipo SET height = :height, width = :width where id = :id";
+                $x = $_POST['x'];
+                $y = $_POST['y'];
+                $sql = "UPDATE $tipo SET height = :height, width = :width, x = :x, y = :y where id = :id";
                 $stmt = $conn->prepare($sql);
                 $stmt->bindParam(':height', $height);
                 $stmt->bindParam(':width', $width);
                 $stmt->bindParam(':id', $id);
+                $stmt->bindParam(':x', $x);
+                $stmt->bindParam(':y', $y);
                 $stmt->execute();
                 echo "Coordenadas actualizadas correctamente correctamente en la base de datos.";
             } else {
