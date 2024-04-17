@@ -41,25 +41,29 @@ if (isset($_POST['option'])) {
             break;
 
         case "UPDATE":
-            if (isset($_POST['height']) && isset($_POST['width']) && isset($_POST['id'])) {
-                $tipo = $_POST['tipo'];
-                $height = $_POST['height'];
-                $width = $_POST['width'];
-                $id = $_POST['id'];
-                $x = $_POST['x'];
-                $y = $_POST['y'];
-                $sql = "UPDATE $tipo SET height = :height, width = :width, x = :x, y = :y where id = :id";
-                $stmt = $conn->prepare($sql);
-                $stmt->bindParam(':height', $height);
-                $stmt->bindParam(':width', $width);
-                $stmt->bindParam(':id', $id);
-                $stmt->bindParam(':x', $x);
-                $stmt->bindParam(':y', $y);
-                $stmt->execute();
-                echo "Coordenadas actualizadas correctamente correctamente en la base de datos.";
-            } else {
-                echo "Error: Altura y anchura no proporcionadas en la solicitud POST.";
+            if(isset($_POST['tipo'])){
+                if (isset($_POST['height']) && isset($_POST['width']) && isset($_POST['id'])) {
+                    
+                    $tipo = $_POST['tipo'];
+                    $height = $_POST['height'];
+                    $width = $_POST['width'];
+                    $id = $_POST['id'];
+                    $x = $_POST['x'];
+                    $y = $_POST['y'];
+                    $sql = "UPDATE $tipo SET height = :height, width = :width, x = :x, y = :y where id = :id";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bindParam(':height', $height);
+                    $stmt->bindParam(':width', $width);
+                    $stmt->bindParam(':id', $id);
+                    $stmt->bindParam(':x', $x);
+                    $stmt->bindParam(':y', $y);
+                    $stmt->execute();
+                    echo "Coordenadas actualizadas correctamente correctamente en la base de datos.";
+                } else {
+                    echo "Error: Altura y anchura no proporcionadas en la solicitud POST.";
+                }
             }
+            
             break;
     }
 } else if (isset($_GET['option'])) {
@@ -91,6 +95,27 @@ if (isset($_POST['option'])) {
             } else if($_GET['tipo'] == 'zona'){
                 $sql = "SELECT * FROM zona";
                 $stmt = $conn->prepare($sql);
+                $stmt->execute();
+                $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                echo json_encode($result);
+            }
+            break;
+        case "GETISLETASBYZONAID":
+            if($_GET['tipo'] == 'zona'){
+                $sql = "SELECT * FROM isleta where id_zona = :id";
+                $stmt = $conn->prepare($sql);
+                $stmt->bindParam(':id', $_GET['idZona']);
+                $stmt->execute();
+                $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                echo json_encode($result);
+            }
+            break;
+        case "GetZonaByID":
+            if($_GET['tipo'] == 'zona'){
+                $id = $_GET['idZona'];
+                $sql = "SELECT * FROM zona where id = :id";
+                $stmt = $conn->prepare($sql);
+                $stmt->bindParam(':id', $id );
                 $stmt->execute();
                 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 echo json_encode($result);
