@@ -22,12 +22,16 @@ footer {
 
 
 .isleta{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: auto;
     background-color: green;
     width: 256px;
     height: 144px;
     margin: 10px;
     overflow: hidden;
-    border: 5px solid black;
+    border: 2px solid black;
     border-radius: 10px;
 }
 
@@ -58,4 +62,11 @@ footer {
 
 .isletaActiva{
     background-color: rgba(0, 198, 0, 0.858);
+}
+
+.etiqueta{
+    background-color: rgba(0, 167, 193, 0.738);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
 }

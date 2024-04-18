@@ -23,9 +23,9 @@
         <div class="containerIzquierda col-2">
             <div class="d-flex flex-column ms-2 me-2">
                 <button class="btn btn-warning" id="añadirZona">Zona <i class="fa-solid fa-plus"></i></button>
-                <button type="button" class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                <button type="button" class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#añadirIsletaModal"
                     id="añadirIsleta">Isleta <i class="fa-solid fa-plus"></i></button>
-                <button class="btn btn-primary   mt-2" id="añadirAcampada">Etiqueta <i
+                <button class="btn btn-primary mt-2" id="añadirEtiqueta" data-bs-toggle="modal" data-bs-target="#añadirEtiquetaModal">Etiqueta <i
                         class="fa-solid fa-plus"></i></button>
             </div>
         </div>
@@ -40,7 +40,7 @@
 
 
     <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="añadirIsletaModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -57,15 +57,49 @@
                             <label for="prefijoEtiquetas">Prefijo de las etiquetas</label>
                             <input type="text" class="form-control" id="prefijoEtiquetas" name="prefijoEtiquetas" >
                         </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" id="añadirIsleta">Crear</button>
+                        </div>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="añadirEtiquetaModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Crear etiqueta</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="etiquetaForm">
+                        <div class="form-group col-md-6">
+                            <label for="nombreEtiqueta">Nombre</label>
+                            <input type="text" class="form-control" name="nombreEtiqueta" id="nombreEtiqueta" >
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="macEtiqueta">Mac</label>
+                            <input type="text" class="form-control" name="macEtiqueta" id="macEtiqueta" >
+                        </div>
                         <div class="form-group col-md-3">
-                            <label for="zonaPerteneciente">Zona a la que pertenece</label>
-                            <select class="form-select" id="zonaPerteneciente" name="zonaPerteneciente">
+                            <label for="isletaPerteneciente">Isleta asociada</label>
+                            <select class="form-select" id="isletaPerteneciente" name="isletaPerteneciente">
+                                <!-- Aquí se cargarán dinámicamente las opciones -->
+                            </select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="pulgadasDisponibles">Pulgadas</label>
+                            <select class="form-select" id="pulgadasDisponibles" name="pulgadasDisponibles">
                                 <!-- Aquí se cargarán dinámicamente las opciones -->
                             </select>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary" id="añadirIsleta">Crear</button>
+                            <button type="submit" class="btn btn-primary" id="añadirEtiqueta">Crear</button>
                         </div>
                     </form>
                 </div>
