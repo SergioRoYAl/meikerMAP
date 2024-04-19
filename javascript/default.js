@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var zonaActivaId = null;
     var isletaActivaId = null;
     var etiquetaActivaId = null;
-
+    var letrasPrefijo = null;
     var formIsleta = document.getElementById("isletaForm");
     var formEtiqueta = document.getElementById("etiquetaForm");
 
@@ -30,14 +30,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    //VOY A HACER
+
     //OBTIENE LAS ZONAS
-    function getZonas() {
+    function getElementos($tipo) {
         $.ajax({
             url: "php/conexion.php",
             type: "GET",
             data: {
                 option: "GETALL",
-                tipo: "zona",
+                tipo: $tipo,
             },
             success: function (response) {
 
@@ -48,10 +50,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 var selectZona = $("#zonaPerteneciente");
                 selectZona.empty();
 
-                zonasInfo.forEach(zona => { 
+                zonasInfo.forEach(zona => {
                     //Limpiar las zonas cargadas, para cargarlas de nuevo
 
-                    var zonaEstructura = $("<div class='d-flex flex-column'><li class='list-group-item' ><p style='font-size: 30px'><button class='btn btn-success mostrarZona '  id='" + zona.id + "'>VER </button> " + zona.nombre + "<button class='btn btn-danger eliminarZona ms-3' id='eliminarZona-" + zona.id + "'>X</button> </p></li></div>");
+                    var zonaEstructura = $("<div class='d-flex flex-column'><li class='list-group-item' ><p style='font-size: 30px'><button class='btn btn-success mostrarZona '  id='z" + zona.id + "'>VER </button> " + zona.nombre + "<button class='btn btn-danger eliminarZona ms-3' id='eliminarZona-" + zona.id + "'>X</button> </p></li></div>");
                     $("#ul").append(zonaEstructura);
 
 
@@ -61,19 +63,52 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
 
+
             //CARGANO LAS ZONAS EN LA PAGINA PRINCIPAL
 
 
 
         });
     }
-    getZonas();
+
+    function getIsletas() {
+        $.ajax({
+            url: "php/conexion.php",
+            type: "GET",
+            data: {
+                option: "GETALL",
+                tipo: "isleta",
+            },
+            success: function (response) {
+
+                var zonasInfo = JSON.parse(response);
+                $(".containerDerecha").append("<ul class='list-group' id=ul></ul>");
+
+                //Esto es para cargar limpiamente las zonas que nos dan de opcion al agregar una isleta
+                var selectZona = $("#zonaPerteneciente");
+                selectZona.empty();
+
+                zonasInfo.forEach(zona => {
+                    //Limpiar las zonas cargadas, para cargarlas de nuevo
+
+                    var zonaEstructura = $("<div class='d-flex flex-column'><li class='list-group-item' ><p style='font-size: 30px'><button class='btn btn-success mostrarZona '  id='z" + zona.id + "'>VER </button> " + zona.nombre + "<button class='btn btn-danger eliminarZona ms-3' id='eliminarZona-" + zona.id + "'>X</button> </p></li></div>");
+                    $("#ul").append(zonaEstructura);
+
+
+                    selectZona.append('<option value="' + zona.id + '">' + zona.nombre + '</option>');
+
+                });
+            }
+        });
+    }
+
+    getElementos("zona");
 
     //EVENT LISTENERS
 
     formIsleta.addEventListener("submit", function (event) {
         if ($(".isleta")) {
-            $(".isleta").removeClass("zonaActiva");
+            $(".isleta").removeClass("isletaActiva");
         }
         // Detener el comportamiento predeterminado de enviar el formulario
         event.preventDefault();
@@ -81,6 +116,16 @@ document.addEventListener("DOMContentLoaded", function () {
         // Obtener los valores de los campos del formulario
         var nombre = document.getElementById("nombreIsleta").value;
         var prefijo = document.getElementById("prefijoEtiquetas").value;
+        console.log(prefijo)
+        switch (prefijo) {
+            case "..":
+                letrasPrefijo = 2;
+                break;
+            case "...":
+                letrasPrefijo = 3;
+                break;
+        }
+
 
         $.ajax({
             url: "php/conexion.php",
@@ -97,28 +142,30 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     contador = contador[0].id + 1;
                 }
-                var isleta = $("<div class='isleta' id='" + contador + "'><h2>" + nombre + "(" + prefijo + ")" + "</h2></div>");
+                var isleta = $("<div class='isleta' id='i" + contador + "'><p>" + nombre + "(" + prefijo + ")" + "</p></div>");
 
-
-                var mainContentWidth = $('.zona#' + zonaActivaId).width();
-                var mainContentHeight = $(".zona#" + zonaActivaId).height();
+                var mainContentWidth = $('#z' + zonaActivaId.substring(1)).width();
+                var mainContentHeight = $("#z" + zonaActivaId.substring(1)).height();
                 //AQUI HAY QUE SELECCIONAR A LA ZONA A LA QUE QUIERES
-                $("#zona-" + zonaActivaId.substring(5)).append(isleta);
+                $("#z" + zonaActivaId.substring(1)).append(isleta);
                 isleta
                     .css({
+                        'left': isleta.x + "px",
+                        'top': isleta.y + "px",
+                        'width': isleta.width + "px",
+                        'height': isleta.height + "px",
                         'position': 'absolute'
                     })
                     .draggable({
-                        containment: ".zona#" + zonaActivaId
+                        containment: ".zona"
                     })
                     .resizable({
-                        containment: ".zona#" + zonaActivaId,
-                        maxWidth: mainContentWidth,
-                        maxHeight: mainContentHeight,
+                        containment: ".zona",
+                        maxWidth: $(".zona").width(),
+                        maxHeight: $(".zona").height(),
                         minWidth: 100, // Establece el ancho mínimo permitido
                         minHeight: 100 // Establece la altura mínima permitida
                     })
-                    console.log("Zona activa: " + zonaActivaId.substring(5));
                 $.ajax({
                     url: "php/conexion.php",
                     type: "POST",
@@ -131,14 +178,13 @@ document.addEventListener("DOMContentLoaded", function () {
                         x: isleta.position().left,
                         y: isleta.position().top,
                         tipo: "isleta",
-                        id_zona: zonaActivaId,
+                        id_zona: zonaActivaId.substring(1),
                         prefijo: prefijo
                     },
                     success: function (response) {
-                        console.log("Respuesta: " + response); // Manejar la respuesta del servidor
                         $('#añadirIsletaModal').modal('hide');
-                        $('.isleta#' + contador).addClass("isletaActiva");
-                        isletaActivaId = contador;
+                        $('#i' + contador).addClass("isletaActiva");
+                        isletaActivaId = "i" + contador;
                     },
                     error: function (xhr, status, error) {
                         console.error(xhr.responseText); // Manejar errores de la solicitud AJAX
@@ -154,6 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     formEtiqueta.addEventListener("submit", function (event) {
+
         if ($(".etiqueta")) {
             $(".etiqueta").removeClass("etiquetaActiva");
         }
@@ -163,6 +210,11 @@ document.addEventListener("DOMContentLoaded", function () {
         // Obtener los valores de los campos del formulario
         var nombre = document.getElementById("nombreEtiqueta").value;
         var mac = document.getElementById("macEtiqueta").value;
+        if (isletaActivaId == null) {
+            var isletaActivaId = document.getElementById("isletaPerteneciente").value;
+        } else {
+            var isletaActivaId = isletaActivaId.substring(1)
+        }
         $.ajax({
             url: "php/conexion.php",
             type: "GET",
@@ -172,14 +224,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 id_isleta: isletaActivaId
             },
             success: function (response) {
-                console.log("Resultado de LASTID(etiqueta): " + response);
                 // Una vez tenemos el ultimo id añadimos el div
                 contador = JSON.parse(response);
-                console.log(contador);
-                if (contador.id == null) {
+                if (contador[0]['MAX(id)'] == null) {
                     contador = 0;
                 } else {
-                    contador = contador[0].id + 1;
+                    contador = contador[0]['MAX(id)'] + 1;
                 }
                 $.ajax({
                     url: "php/conexion.php",
@@ -191,58 +241,57 @@ document.addEventListener("DOMContentLoaded", function () {
                     },
                     success: function (response) {
                         var prefijo = JSON.parse(response);
-                        if(prefijo == "" ){
+                        if (prefijo == "") {
                             alert("No se ha seleccionado ninguna isleta");
                         }
                         prefijo = prefijo[0].prefijo;
                         if (!prefijo) {
                             prefijo = "XXX";
                         }
-                            var etiqueta = $("<div class='etiqueta' id='"+ prefijo + contador +"'><h2>" + nombre + "(" + prefijo + contador + ")" + "</h2></div>");
+                        var etiqueta = $("<div class='etiqueta' id='" + prefijo + contador + "'><p>" + nombre + "(" + prefijo + contador + ")" + "</p></div>");
 
 
-                            var mainContentWidth = $(".isleta#" + isletaActivaId).width();
-                            var mainContentHeight = $(".isleta#" + isletaActivaId).height();
-                            //AQUI HAY QUE SELECCIONAR A LA ZONA A LA QUE QUIERES
-                            $(".isleta#" + isletaActivaId).append(etiqueta);
-                            etiqueta
-                                .css({
-                                    'position': 'absolute'
-                                })
-                                .draggable({
-                                    containment: ".isleta#" + isletaActivaId,
-
-                                })
-
-                            $.ajax({
-                                url: "php/conexion.php",
-                                type: "POST",
-                                data: {
-                                    option: "INSERT",
-                                    mac: mac,
-                                    nombre: nombre,
-                                    id: contador, // Asignar el ID único a la etiqueta
-                                    x: etiqueta.position().left,
-                                    y: etiqueta.position().top,
-                                    tipo: "etiqueta",
-                                    id_isleta: isletaActivaId,
-                                    prefijo: prefijo + contador
-                                },
-                                success: function (response) {
-                                    console.log(response); // Manejar la respuesta del servidor
-                                    $('#añadirEtiquetaModal').modal('hide');
-                                    $('#etiqueta-' + contador).addClass("etiquetaActiva");
-                                },
-                                error: function (xhr, status, error) {
-                                    console.error(xhr.responseText); // Manejar errores de la solicitud AJAX
-                                }
-                            })
-
-
-
-
-
+                        var mainContentWidth = $("#" + isletaActivaId).width();
+                        var mainContentHeight = $("#" + isletaActivaId).height();
+                        //AQUI HAY QUE SELECCIONAR A LA ZONA A LA QUE QUIERES
                         
+                        $("#i" + isletaActivaId).append(etiqueta);
+                        etiqueta
+                            .css({
+                                'position': 'absolute',
+                                'display': 'flex',
+                                'flex-direction': 'column',
+                                'position': 'absolute',
+                                maxHeight: mainContentHeight,
+                                maxWidth: mainContentWidth,
+
+                            })
+                            .draggable({
+                                containment: "#i" + isletaActivaId,
+                            })
+                        
+                        $.ajax({
+                            url: "php/conexion.php",
+                            type: "POST",
+                            data: {
+                                option: "INSERT",
+                                mac: mac,
+                                nombre: nombre,
+                                id: contador, // Asignar el ID único a la etiqueta
+                                x: etiqueta.position().left,
+                                y: etiqueta.position().top,
+                                tipo: "etiqueta",
+                                id_isleta: isletaActivaId,
+                                prefijo: prefijo + contador
+                            },
+                            success: function (response) {
+                                $('#añadirEtiquetaModal').modal('hide');
+                                $('#e' + contador).addClass("etiquetaActiva");
+                            },
+                            error: function (xhr, status, error) {
+                                console.error(xhr.responseText); // Manejar errores de la solicitud AJAX
+                            }
+                        })
                     },
                     error: function (xhr, status, error) {
                     }
@@ -273,14 +322,14 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             success: function (response) {
                 $(".containerDerecha").empty();
-                console.log(response);
                 contador = JSON.parse(response);
                 if (contador.id == 0) {
                     contador = 1;
                 } else {
                     contador = contador[0].id + 1;
                 }
-                var zona = $("<div class='zona' id='" + contador + "'><h2>Zona " + contador + "</h2></div>");
+                zonaActivaId = "z" + contador;
+                var zona = $("<div class='zona' id='z" + contador + "'><h2>Zona " + contador + "</h2></div>");
                 var mainContentWidth = $(".containerCentral").width();
                 var mainContentHeight = $(".containerCentral").height();
 
@@ -305,9 +354,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         width: zona.height(),
                     },
                     success: function (response) {
-                        $('.zona#' + contador).addClass("zonaActiva");
-                        zonaActivaId = contador;
-                        getZonas();
+                        $('#z' + contador).addClass("zonaActiva");
+                        zonaActivaId = "z" + contador;
+                        getElementos("zona");
                     },
                     error: function (xhr, status, error) {
                         console.error(xhr.responseText); // Manejar errores de la solicitud AJAX
@@ -324,43 +373,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    function actualizarTamaño(elemento, tipo, mac = null) {
+    function actualizarTamaño(elemento, tipo) {
+        var data = {
+            option: "UPDATE",
+            tipo: tipo
+        };
 
-        
-
-        var id = elemento.attr("id");
-
-        if (tipo == "isleta") {
-            var x = elemento.position().left;
-            var y = elemento.position().top;
-            var id = id.substring(7);
-        } else if (tipo == "zona") {
-            
-        } else if (tipo == "etiqueta") {
-            var id = id.substring(9);
+        switch (tipo) {
+            case 'isleta':
+                data.id = elemento.attr("id").substring(1);
+                data.x = elemento.position().left;
+                data.y = elemento.position().top;
+                data.height = elemento.height();
+                data.width = elemento.width();
+                console.log(data)
+                break;
+            case 'zona':
+                data.id = elemento.attr("id").substring(1);
+                data.height = elemento.height();
+                data.width = elemento.width();
+                break;
+            case 'etiqueta':
+                data.id = elemento.attr("id")
+                data.prefijo = elemento.attr("id");
+                data.x = elemento.position().left;
+                data.y = elemento.position().top;
+                console.log(data);
+                break;
         }
-        var height = elemento.height();
-        var width = elemento.width();
+
 
         // Enviar las dimensiones a la base de datos
         $.ajax({
             url: "php/conexion.php",
             type: "POST",
-            data: {
-                id: id,
-                height: height,
-                width: width,
-                x: x,
-                y: y,
-                option: "UPDATE",
-                tipo: tipo
-            },
+            data: data,
             success: function (response) {
                 console.log("Se ha actualizado correctamente"); // Manejar la respuesta del servidor
-                // Cambiamos la isleta activa
-                $('#isleta-' + isletaActivaId).removeClass('isletaActiva');
-                isletaActivaId = id;
-                $('#isleta-' + isletaActivaId).addClass("isletaActiva");
             },
             error: function (xhr, status, error) {
                 console.error(xhr.responseText); // Manejar errores de la solicitud AJAX
@@ -395,9 +444,9 @@ document.addEventListener("DOMContentLoaded", function () {
     //Seleccionar la zona activa
 
     $(document).on('click', '.zona', function () {
-        $('.zona#' + zonaActivaId).removeClass("zonaActiva");
+        $('#' + zonaActivaId).removeClass("zonaActiva");
         zonaActivaId = $(this).attr('id');
-        $('.zona#' + zonaActivaId).addClass("zonaActiva");
+        $('#' + zonaActivaId).addClass("zonaActiva");
         console.log('Zona activa seleccionada:', zonaActivaId);
 
     });
@@ -405,10 +454,10 @@ document.addEventListener("DOMContentLoaded", function () {
     //Seleccionar la isleta activa
 
     $(document).on('click', '.isleta', function () {
-        
-        $(".isleta#" + isletaActivaId).removeClass("isletaActiva");
+
+        $("#" + isletaActivaId).removeClass("isletaActiva");
         isletaActivaId = $(this).attr('id');
-        $(".isleta#" + isletaActivaId).addClass("isletaActiva");
+        $("#" + isletaActivaId).addClass("isletaActiva");
         console.log('Isleta activa seleccionada:', isletaActivaId);
 
     });
@@ -416,19 +465,24 @@ document.addEventListener("DOMContentLoaded", function () {
     //Seleccionar la etiqueta activa
 
     $(document).on('click', '.etiqueta', function () {
-        $('.etiqueta#' + etiquetaActivaId).removeClass("etiquetaActiva");
+        $('#e' + etiquetaActivaId).removeClass("etiquetaActiva");
         etiquetaActivaId = $(this).attr('id');
-        $('.etiqueta#' + etiquetaActivaId).addClass("etiquetaActiva");
+        $('#e' + etiquetaActivaId).addClass("etiquetaActiva");
         console.log('Etiqueta activa seleccionada:', etiquetaActivaId);
 
     });
 
 
     $(document).on('click', '.mostrarZona', function () {
-        alert("La zona actual se ha guardado, cambiando de zona...");
+
         zonaAMostrar = $(this).attr('id');
         zonaActivaId = zonaAMostrar;
+
+        alert("La zona actual se ha guardado, cambiando de zona...");
+
         $('.containerCentral').empty();
+
+
 
         $.ajax({
             url: "php/conexion.php",
@@ -436,12 +490,11 @@ document.addEventListener("DOMContentLoaded", function () {
             data: {
                 option: "GETISLETASBYZONAID",
                 tipo: "zona",
-                idZona: zonaActivaId,
+                idZona: zonaActivaId.substring(1),
             },
             success: function (response) {
 
                 var isletasInfo = JSON.parse(response);
-                console.log(isletasInfo);
 
                 $.ajax({
                     url: "php/conexion.php",
@@ -449,14 +502,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     data: {
                         option: "GetZonaByID",
                         tipo: "zona",
-                        idZona: zonaActivaId,
+                        idZona: zonaActivaId.substring(1),
                     },
                     success: function (response) {
                         var infoZona = JSON.parse(response);
+                        console.log(infoZona);
                         var zona = $("<div class='zona' id='" + zonaAMostrar + "' style='"
                             + "width: " + infoZona[0].width + "px;" +
                             "height: " + infoZona[0].height + "px;" +
-                            "'><h2>Zona " + zonaActivaId + "</h2></div>");
+                            "'><h2>Zona " + zonaActivaId.substring(1) + "</h2></div>");
                         var mainContentWidth = $(".containerCentral").width();
                         var mainContentHeight = $(".containerCentral").height();
 
@@ -473,7 +527,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             })
 
                         isletasInfo.forEach(isleta => {
-                            var isletaACrear = $("<div class='isleta' id='" + isleta.id + "'><h2>" + isleta.nombre + "(" + isleta.prefijo + ")</h2></div>");
+                            var isletaACrear = $("<div class='isleta' id='i" + isleta.id + "'><p>" + isleta.nombre + "(" + isleta.prefijo + ")</p></div>");
 
                             isletaACrear
                                 .css({
@@ -493,6 +547,10 @@ document.addEventListener("DOMContentLoaded", function () {
                                     minWidth: 100, // Establece el ancho mínimo permitido
                                     minHeight: 100 // Establece la altura mínima permitida
                                 })
+
+                            // console.log("Zona a mostrar" + zonaAMostrar);     zID
+                            // console.log("isleta id" + isleta.id);              ID
+
                             $("#" + zonaAMostrar).append(isletaACrear);
                             $.ajax({
                                 url: "php/conexion.php",
@@ -504,30 +562,32 @@ document.addEventListener("DOMContentLoaded", function () {
                                 },
                                 success: function (response) {
                                     var etiquetasInfo = JSON.parse(response);
-                                    console.log(etiquetasInfo);
+
                                     etiquetasInfo.forEach(etiqueta => {
+                                        var x = etiqueta.x;
+                                        var y = etiqueta.y;
+                                        var etiqueta = $("<div class='etiqueta' id='" + etiqueta.prefijo + "'><p>" + etiqueta.nombre + "(" + etiqueta.prefijo + ")</p></div>");
 
-                                        var etiqueta = $("<div class='etiqueta' id='"+ etiqueta.prefijo + etiqueta.id + +"'><h2>" + etiqueta.nombre + "(" + etiqueta.prefijo + etiqueta.id + ")" + "</h2></div>");
-                                        console.log(isleta.id + "AAAAAAAAAAAAAAAAaaaa");
 
-                                        var mainContentWidth = $(".isleta#" + isleta.id).width();
-                                        var mainContentHeight = $(".isleta#" + isleta.id).height();
+                                        var mainContentWidth = $("#i" + isleta.id).width();
+                                        var mainContentHeight = $("#i" + isleta.id).height();
                                         //AQUI HAY QUE SELECCIONAR A LA ZONA A LA QUE QUIERES
-                                        $(".isleta#" + isleta.id).append(etiqueta);
+                                        $("#i" + isleta.id).append(etiqueta);
                                         etiqueta
                                             .css({
+                                                'display': 'flex',
+                                                'flex-direction': 'column',
                                                 'position': 'absolute',
-                                                'left': etiqueta.x + "px",
-                                                'top': etiqueta.y + "px",
+                                                'left': x + "px",
+                                                'top': y + "px",
                                                 maxHeight: mainContentHeight,
                                                 maxWidth: mainContentWidth,
-                                                position: 'absolute'
                                             })
                                             .draggable({
-                                                containment: ".isleta#" + isleta.id
+                                                containment: "#i" + isleta.id
                                             })
-                                            
-                                    }); 
+
+                                    });
                                 },
                                 error: function (xhr, status, error) {
                                     reject(error);
@@ -536,8 +596,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                         });
-                        $('.zona#' + zonaAMostrar).addClass("zonaActiva");
-                        
+                        $('#' + zonaAMostrar).addClass("zonaActiva");
+
                     },
                     error: function (xhr, status, error) {
                         reject(error);
@@ -554,9 +614,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
+    $(document).on('click', '#añadirEtiqueta', function () {
+        zonaId = zonaActivaId.substring(1);
+        $.ajax({
+            url: "php/conexion.php",
+            type: "GET",
+            data: {
+                option: "GETISLETASBYZONAID",
+                tipo: "zona",
+                idZona: zonaId,
+            },
+            success: function (response) {
+                var isletas = JSON.parse(response);
+                var selectIsleta = $("#isletaPerteneciente");
+                isletas.forEach(isleta => {
+
+                    selectIsleta.append('<option value="' + isleta.id + '">' + isleta.nombre + '</option>');
+
+                });
+            },
+            error: function (xhr, status, error) {
+                console.log(xhr, status, error)
+            }
+        })
+    });
+
     $(document).on('click', '.eliminarZona', function () {
 
         var idZona = $(this).attr('id');
+        var zonaActiva = null;
+        if ($('.zona').attr('id')) {
+            zonaActiva = $('.zona').attr('id').substring(1);
+        }
         idZona = idZona.substring(13);
         $.ajax({
             url: "php/conexion.php",
@@ -567,9 +656,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 id: idZona
             },
             success: function (response) {
-                console.log(response);
+                if (zonaActiva == idZona) {
+                    $('.containerCentral').empty();
+                }
                 $(".containerDerecha").empty();
-                getZonas();
+                getElementos("zona");
             },
             error: function (xhr, status, error) {
                 console.error(xhr.responseText); // Manejar errores de la solicitud AJAX

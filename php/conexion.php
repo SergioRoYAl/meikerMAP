@@ -61,26 +61,46 @@ if (isset($_POST['option'])) {
 
         case "UPDATE":
             if (isset($_POST['tipo'])) {
-                if (isset($_POST['height']) && isset($_POST['width']) && isset($_POST['id'])) {
-
-                    $tipo = $_POST['tipo'];
-                    $height = $_POST['height'];
-                    $width = $_POST['width'];
-                    $id = $_POST['id'];
-                    $x = $_POST['x'];
-                    $y = $_POST['y'];
-                    $sql = "UPDATE $tipo SET height = :height, width = :width, x = :x, y = :y where id = :id";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->bindParam(':height', $height);
-                    $stmt->bindParam(':width', $width);
-                    $stmt->bindParam(':id', $id);
-                    $stmt->bindParam(':x', $x);
-                    $stmt->bindParam(':y', $y);
-                    $stmt->execute();
-                    echo "Coordenadas actualizadas correctamente correctamente en la base de datos.";
-                } else {
-                    echo "Error: Altura y anchura no proporcionadas en la solicitud POST.";
+                $tipo = $_POST['tipo'];
+                $id = $_POST['id'];
+                
+                switch ($tipo) {
+                    case 'isleta':
+                        $sql = "UPDATE $tipo SET height = :height, width = :width, x = :x, y = :y where id = :id";
+                        $stmt = $conn->prepare($sql);
+                        $height = $_POST['height'];
+                        $width = $_POST['width'];
+                        $x = $_POST['x'];
+                        $y = $_POST['y'];
+                        $stmt->bindParam(':id', $id);
+                        $stmt->bindParam(':height', $height);
+                        $stmt->bindParam(':width', $width);
+                        $stmt->bindParam(':x', $x);
+                        $stmt->bindParam(':y', $y);
+                        break;
+                    case 'zona':
+                        $sql = "UPDATE $tipo SET height = :height, width = :width where id = :id";
+                        $stmt = $conn->prepare($sql);
+                        $height = $_POST['height'];
+                        $width = $_POST['width'];
+                        $stmt->bindParam(':id', $id);
+                        $stmt->bindParam(':height', $height);
+                        $stmt->bindParam(':width', $width);
+                        break;
+                    case 'etiqueta':
+                        $sql = "UPDATE $tipo SET x = :x, y = :y where prefijo = :prefijo";
+                        $stmt = $conn->prepare($sql);
+                        $x = $_POST['x'];
+                        $y = $_POST['y'];
+                        $stmt->bindParam(':prefijo', $id);
+                        $stmt->bindParam(':x', $x);
+                        $stmt->bindParam(':y', $y);
+                        break;
                 }
+                $stmt->execute();
+                echo "Coordenadas actualizadas correctamente correctamente en la base de datos.";
+            } else {
+                echo "Error: Altura y anchura no proporcionadas en la solicitud POST.";
             }
 
             break;
@@ -117,16 +137,13 @@ if (isset($_POST['option'])) {
             } else if ($_GET['tipo'] == "etiqueta") {
                 try {
                     $tipo = $_GET['tipo'];
+                    $id_isleta = $_GET['id_isleta'];
                     $sql = "SELECT MAX(id) FROM $tipo WHERE id_isleta = :id_isleta";
                     $stmt = $conn->prepare($sql);
-                    $stmt->bindParam(':id_isleta', $_GET['id_isleta']);
+                    $stmt->bindParam(':id_isleta', $id_isleta);
                     $stmt->execute();
                     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    if (count($result) == 0) {
-                        echo json_encode(array("id" => 0));
-                    } else {
-                        echo json_encode($result);
-                    }
+                    echo json_encode($result);
                 } catch (PDOException $e) {
                     echo "Error de conexión: " . $e->getMessage();
                 }
@@ -171,9 +188,10 @@ if (isset($_POST['option'])) {
             break;
         case "GETPREFIJO":
             if ($_GET['tipo'] == 'isleta') {
+                $id = $_GET['id'];
                 $sql = "SELECT prefijo FROM isleta where id = :id";
                 $stmt = $conn->prepare($sql);
-                $stmt->bindParam(':id', $_GET['id']);
+                $stmt->bindParam(':id', $id);
                 $stmt->execute();
                 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 echo json_encode($result);
