@@ -15,7 +15,7 @@ if (isset($_POST['option'])) {
         case "INSERT":
 
             if ($_POST['tipo'] == 'isleta') {
-                $sql = "INSERT INTO isleta (nombre, height, width, x, y, id_zona, prefijo) VALUES (:nombre, :height, :width, :x, :y, :id_zona, :prefijo)";
+                $sql = "INSERT INTO isleta (nombre, height, width, x, y, id_zona, prefijo, redonda) VALUES (:nombre, :height, :width, :x, :y, :id_zona, :prefijo, :redonda)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bindParam(':x', $_POST['x']);
                 $stmt->bindParam(':y', $_POST['y']);
@@ -24,6 +24,7 @@ if (isset($_POST['option'])) {
                 $stmt->bindParam(':width', $_POST['width']);
                 $stmt->bindParam(':id_zona', $_POST['id_zona']);
                 $stmt->bindParam(':prefijo', $_POST['prefijo']);
+                $stmt->bindParam(':redonda', $_POST['redonda']);
                 $stmt->execute();
                 $id_objeto_creado = $conn->lastInsertId();
                 echo $id_objeto_creado;
@@ -48,7 +49,8 @@ if (isset($_POST['option'])) {
                 $mac = $_POST['mac'];
                 $id_isleta = $_POST['id_isleta'];
                 $prefijo = $_POST['prefijo'];
-                $sql = "INSERT INTO etiqueta (nombre, mac, x, y, id_isleta, prefijo) VALUES (:nombre, :mac, :x, :y, :id_isleta, :prefijo)";
+                $posicion = $_POST['posicion'];
+                $sql = "INSERT INTO etiqueta (nombre, mac, x, y, id_isleta, prefijo, posicion) VALUES (:nombre, :mac, :x, :y, :id_isleta, :prefijo, :posicion)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bindParam(':nombre', $nombre);
                 $stmt->bindParam(':y', $y);
@@ -56,6 +58,7 @@ if (isset($_POST['option'])) {
                 $stmt->bindParam(':mac', $mac);
                 $stmt->bindParam(':id_isleta', $id_isleta);
                 $stmt->bindParam(':prefijo', $prefijo);
+                $stmt->bindParam(':posicion', $posicion);
                 $stmt->execute();
                 $id_objeto_creado = $conn->lastInsertId();
                 echo $id_objeto_creado;
@@ -200,37 +203,24 @@ if (isset($_POST['option'])) {
 } else if (isset($_GET['option'])) {
 
     switch ($_GET['option']) {
-        case "LASTID":
-            if ($_GET['tipo'] == "zona" || $_GET['tipo'] == "isleta" || $_GET['tipo'] == "ap") {
-                try {
-                    $tipo = $_GET['tipo'];
-                    $sql = "SELECT * FROM $tipo where id = (SELECT MAX(id) FROM $tipo)";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->execute();
-                    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    if (count($result) == 0) {
-                        echo json_encode(array("id" => 0));
-                    } else {
-                        echo json_encode($result);
-                    }
-                } catch (PDOException $e) {
-                    echo "Error de conexión: " . $e->getMessage();
-                }
-            } else if ($_GET['tipo'] == "etiqueta") {
-                try {
-                    $tipo = $_GET['tipo'];
-                    $id_isleta = $_GET['id_isleta'];
-                    $sql = "SELECT MAX(id) FROM $tipo WHERE id_isleta = :id_isleta";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->bindParam(':id_isleta', $id_isleta);
-                    $stmt->execute();
-                    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    echo json_encode($result);
-                } catch (PDOException $e) {
-                    echo "Error de conexión: " . $e->getMessage();
-                }
-            }
+        case "EliminarEtiqueta":
+            $id = $_GET['id'];
+            $id_isleta = $_GET['id_isleta'];
 
+            $sql2 = "UPDATE etiqueta 
+            SET posicion = posicion - 1 
+            WHERE id_isleta = :id_isleta
+            AND posicion >= (SELECT posicion FROM etiqueta WHERE id = :id)";
+            $stmt2 = $conn->prepare($sql2);
+            $stmt2->bindParam(':id_isleta', $id_isleta);
+            $stmt2->bindParam(':id', $id);
+            $stmt2->execute();
+            $result2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+            $sql1 = "DELETE FROM etiqueta WHERE id = :id";
+            $stmt1 = $conn->prepare($sql1);
+            $stmt1->bindParam(':id', $id);
+            $stmt1->execute();
+            $result1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
             break;
         case "GETALL":
             if ($_GET['tipo'] == 'isleta') {
@@ -280,7 +270,7 @@ if (isset($_POST['option'])) {
             $sql = "SELECT * FROM etiqueta where id_isleta = :id_isleta";
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(':id_isleta', $id_isleta);
-            $stmt->execute(); 
+            $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode($result);
             break;

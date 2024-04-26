@@ -23,3 +23,12 @@ var resizeando = false;
     });
 
     */
+
+
+
+/* 
+
+anyadir opcion Ctrl + Z para deshacer la ultima accion
+con ui-draggable-dragging
+
+*/
