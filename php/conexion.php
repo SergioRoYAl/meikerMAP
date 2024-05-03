@@ -207,6 +207,8 @@ if (isset($_POST['option'])) {
             $id = $_GET['id'];
             $id_isleta = $_GET['id_isleta'];
 
+            
+
             $sql2 = "UPDATE etiqueta 
             SET posicion = posicion - 1 
             WHERE id_isleta = :id_isleta
@@ -216,11 +218,14 @@ if (isset($_POST['option'])) {
             $stmt2->bindParam(':id', $id);
             $stmt2->execute();
             $result2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode($result2);
+
             $sql1 = "DELETE FROM etiqueta WHERE id = :id";
             $stmt1 = $conn->prepare($sql1);
             $stmt1->bindParam(':id', $id);
             $stmt1->execute();
             $result1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
+            
             break;
         case "GETALL":
             if ($_GET['tipo'] == 'isleta') {
