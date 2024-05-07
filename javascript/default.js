@@ -1312,7 +1312,5 @@ document.addEventListener("DOMContentLoaded", function () {
     getZonas();
     estadoBotones();
 
-
-
-
 });
+//Por Sergio Romero Alarcón

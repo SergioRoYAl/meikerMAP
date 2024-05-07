@@ -309,3 +309,5 @@ if (isset($_POST['option'])) {
             break;
     }
 }
+
+//Por Sergio Romero Alarcón
