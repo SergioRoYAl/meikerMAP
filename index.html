@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/jquery.ui.css">
     <link rel="stylesheet" href="css/bootstrap.css">
-    <link rel="icon" type="image/ico" href="favicon.ico"/>
+    <link rel="icon" type="image/ico" href="favicon.ico" />
     <link rel="stylesheet" href="css/alertify.css">
     <link rel="stylesheet" href="css/alertify.min.css">
     <link rel="stylesheet" href="css/jquery.toast.min.css">
-    
+
 </head>
 
 <body>
@@ -20,65 +20,80 @@
         <div class="d-flex flex-row">
 
             <div class="col-3">
-                <h5 class="mt-1 ms-2 h5 text-start " id="nombreZonaNavbar" >Plano: </h5>
+                <h5 class="mt-1 ms-2 h5 text-start " id="nombreZonaNavbar">Plano: </h5>
             </div>
             <div class="col-3">
-                <h5 class="mt-1 ms-2 h5 text-start " id="cantidadAPS" >APs: </h5>
+                <h5 class="mt-1 ms-2 h5 text-start " id="cantidadAPS">APs: </h5>
             </div>
             <div class="col-3">
-                <h5 class="mt-1 ms-2 h5 text-start " id="cantidadIsletas" >Isletas: </h5>
+                <h5 class="mt-1 ms-2 h5 text-start " id="cantidadIsletas">Isletas: </h5>
             </div>
             <div class="col-3">
-                <h5 class="mt-1 ms-2 h5 text-start " id="cantidadEtiquetas" >ETEs: </h5>
+                <h5 class="mt-1 ms-2 h5 text-start " id="cantidadEtiquetas">ETEs: </h5>
             </div>
         </div>
-            
-          
+
+
     </nav>
 
 
     <div class="d-flex flex-row">
         <div class="containerIzquierda col-1 text-justify">
             <div class="d-flex flex-row" id="herramientas">
-                <div class="col-12" >
+                <div class="col-12">
                     <div class="d-flex flex-column mt-2">
-                        <button class="btn btn-warning btnTool" data-bs-toggle="modal" data-bs-target="#añadirZonaModal" id="añadirZona">
+                        <button class="btn btn-warning btnTool" data-bs-toggle="modal" data-bs-target="#añadirZonaModal"
+                            id="añadirZona">
                             Zona <i class="fa-regular fa-map"></i>
                         </button>
                     </div>
                     <div class="d-flex flex-column ">
-                        <button type="button" class="btn btn-success btnTool mt-2" data-bs-toggle="modal" data-bs-target="#añadirIsletaModal" id="añadirIsleta">
+                        <button type="button" class="btn btn-success btnTool mt-2" data-bs-toggle="modal"
+                            data-bs-target="#añadirIsletaModal" id="añadirIsleta">
                             Isleta <i class="fa-brands fa-codepen"></i>
                         </button>
                     </div>
                     <div class="d-flex flex-column ">
-                        <button type="button" class="btn btn-primary btnTool mt-2" id="añadirEtiqueta" data-bs-toggle="modal" data-bs-target="#añadirEtiquetaModal">
+                        <button type="button" class="btn btn-primary btnTool mt-2" id="añadirEtiqueta"
+                            data-bs-toggle="modal" data-bs-target="#añadirEtiquetaModal">
                             ETE <i class="fa-solid fa-ticket"></i>
                         </button>
                     </div>
                     <div class="d-flex flex-column ">
-                        <button type="button" class="btn btn-primary btnTool mt-2" id="añadirAP" data-bs-toggle="modal" data-bs-target="#añadirAPModal">
+                        <button type="button" class="btn btn-primary btnTool mt-2" id="añadirAP" data-bs-toggle="modal"
+                            data-bs-target="#añadirAPModal">
                             AP <i class="fa-solid fa-wifi"></i>
                         </button>
                     </div>
-                    
+                    <div class="d-flex flex-row mt-2 justify-content-between  ">
+                        <button class="btn activarEditado"><span><i class="fas fa-pencil-alt"></i></span> </button>
+                        <button class="btn activarBorrado"><span><i class="fa-solid fa-eraser"></i></span></i></button>
+                        <button class="btn activarBloqueo"><span><i class="fa-solid fa-lock"></i></span></button>
+                       
+                    </div >
+                    <div class="d-flex flex-row mt-2">
+                        
+                    </div>
+
+
                 </div>
             </div>
-            <button class="btn"> <i class="fas fa-pencil-alt"></i> Editar elemento </button>
+
+
             <div class="containerDerecha d-flex flex-column ">
-          
+
             </div>
-            
+
         </div>
         <div class="containerCentral col-11" id="containerAreas">
             <div id="containerResize"> </div>
 
-            
+
         </div>
-        
-        
+
+
     </div>
-    
+
 
 
 
@@ -102,15 +117,15 @@
                                 maxlength="3" minlength="2">
                         </div>
                         <div class="form-group col-md-12 d-flex ">
-                           
-                            <div class="flex-row mt-2"> 
+
+                            <div class="flex-row mt-2">
                                 <p>Tipo de Superficie</p>
                                 <input type="radio" id="superficieCuadrada" name="tipoSuperficie" value="cuadrada">
                                 <label for="superficieCuadrada">Rectangular</label><br>
                                 <input type="radio" id="superficieRedonda" name="tipoSuperficie" value="redonda">
                                 <label for="superficieRedonda">Redonda</label><br>
                             </div>
-                           
+
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -123,7 +138,7 @@
         </div>
     </div>
 
-    
+
 
     <div class="modal fade" id="añadirEtiquetaModal" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -140,16 +155,14 @@
                             <input type="text" class="form-control" name="nombreEtiqueta" id="nombreEtiqueta">
                         </div>
                         <div class="form-group col-md-12">
-                            <label for="macEtiqueta">Mac</label>
-                            <input type="text" class="form-control" name="macEtiqueta" id="macEtiqueta">
-                        </div>
-                        <div class="form-group col-md-12">
                             <label for="cantidadEtiquetasAAñadir">Numero Etiquetas</label>
-                            <input type="number" class="form-control" name="cantidadEtiquetasAAñadir" id="cantidadEtiquetasAAñadir">
+                            <input type="number" class="form-control" name="cantidadEtiquetasAAñadir"
+                                id="cantidadEtiquetasAAñadir">
                         </div>
                         <div class="form-group col-md-3">
                             <label for="isletaPerteneciente">Isleta asociada</label>
-                            <select class="form-select" id="isletaPerteneciente" name="isletaPerteneciente" style="width: 235px;">
+                            <select class="form-select" id="isletaPerteneciente" name="isletaPerteneciente"
+                                style="width: 235px;">
                                 <!-- Aquí se cargarán dinámicamente las opciones -->
                             </select>
                         </div>
@@ -219,6 +232,7 @@
             </div>
         </div>
     </div>
+
     <script src="javascript/default.js"></script>
     <script src="javascript/bootstrap.js"></script>
     <script src="javascript/fontawesome.js"></script>
@@ -232,4 +246,3 @@
 </body>
 
 </html>
-

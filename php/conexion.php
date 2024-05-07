@@ -43,6 +43,8 @@ if (isset($_POST['option'])) {
                 echo $id_objeto_creado;
                 break;
             } else if ($_POST['tipo'] == 'etiqueta') {
+                $miArray = array();
+                $cantidad = $_POST['cantidad'];
                 $nombre = $_POST['nombre'];
                 $y = $_POST['y'];
                 $x = $_POST['x'];
@@ -50,18 +52,24 @@ if (isset($_POST['option'])) {
                 $id_isleta = $_POST['id_isleta'];
                 $prefijo = $_POST['prefijo'];
                 $posicion = $_POST['posicion'];
-                $sql = "INSERT INTO etiqueta (nombre, mac, x, y, id_isleta, prefijo, posicion) VALUES (:nombre, :mac, :x, :y, :id_isleta, :prefijo, :posicion)";
-                $stmt = $conn->prepare($sql);
-                $stmt->bindParam(':nombre', $nombre);
-                $stmt->bindParam(':y', $y);
-                $stmt->bindParam(':x', $x);
-                $stmt->bindParam(':mac', $mac);
-                $stmt->bindParam(':id_isleta', $id_isleta);
-                $stmt->bindParam(':prefijo', $prefijo);
-                $stmt->bindParam(':posicion', $posicion);
-                $stmt->execute();
-                $id_objeto_creado = $conn->lastInsertId();
-                echo $id_objeto_creado;
+                while ($cantidad > 0) {
+
+                    $sql = "INSERT INTO etiqueta (nombre, mac, x, y, id_isleta, prefijo, posicion) VALUES (:nombre, :mac, :x, :y, :id_isleta, :prefijo, :posicion)";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bindParam(':nombre', $nombre);
+                    $stmt->bindParam(':y', $y);
+                    $stmt->bindParam(':x', $x);
+                    $stmt->bindParam(':mac', $mac);
+                    $stmt->bindParam(':id_isleta', $id_isleta);
+                    $stmt->bindParam(':prefijo', $prefijo);
+                    $stmt->bindParam(':posicion', $posicion);
+                    $stmt->execute();
+                    $id_objeto_creado = $conn->lastInsertId();
+                    $cantidad--;
+                    $posicion++;
+                    $miArray[] = $id_objeto_creado;
+                }
+                echo $miArray[0];
                 break;
             } else if ($_POST['tipo'] == 'etiquetaFull') {
                 $nombre = $_POST['nombre'];
@@ -207,7 +215,7 @@ if (isset($_POST['option'])) {
             $id = $_GET['id'];
             $id_isleta = $_GET['id_isleta'];
 
-            
+
 
             $sql2 = "UPDATE etiqueta 
             SET posicion = posicion - 1 
@@ -225,7 +233,7 @@ if (isset($_POST['option'])) {
             $stmt1->bindParam(':id', $id);
             $stmt1->execute();
             $result1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
-            
+
             break;
         case "GETALL":
             if ($_GET['tipo'] == 'isleta') {
