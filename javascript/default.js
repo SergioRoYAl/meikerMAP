@@ -26,73 +26,241 @@ document.addEventListener("DOMContentLoaded", function () {
     var bloqueando = null
 
 
+    var permitirBorradoEtiqueta = false
+    var permitirBorradoIsleta = false
+
+    var elementoConZIndexMasAlto = null;
+    var elem = document.documentElement;
+    var requestFullScreen = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.mozRequestFullScreen || elem.msRequestFullscreen;
+    var exitFullScreen = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+
+
+    //PARA MAXIMIZAR LA VENTANA Y OPTIMIZAR EL ESPACIO
+
+    function estadoHerramientas(borrado, editado, bloqueo) {
+        if (borrado) {
+            borrando = false;
+            $('.activarBorrado')
+                .css({
+                    'background-color': 'transparent'
+
+                })
+        }
+        if (editado) {
+            editando = false;
+            $('.activarEditado')
+                .css({
+                    'background-color': 'transparent'
+
+                })
+        }
+        if (bloqueo) {
+            bloqueando = false;
+            $('.activarBloqueo')
+                .css({
+                    'background-color': 'transparent'
+
+                })
+        }
+
+
+    }
     //FUNCIONES PARA ACTUALIZAR LOS ID DE LOS ELEMENTOS ACTIVOS
+    function borrarIsleta(isletaId) {
 
-    $(document).on('click', '.isleta', function () {
+        var isletaPrefijo = $('#' + isletaId).find('p').text().match(/\((.*?)\)/)[1];
+        var isletaNombre = $('#' + isletaId).find('p').text().split("(")[0];
 
-        if (borrando) {
-            //la eliminamos, en caso de que quieran que no haya confirmación,
-            //o que si quieran confirmación , ahora vemos
+        Swal.fire({
+            title: "Borrar la isleta " + isletaNombre + " " + isletaPrefijo + "?",
+            text: "NO SE PUEDE DESHACER",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, borralo"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                idIsletaABorrar = isletaId.substring(1);
+                console.log(idIsletaABorrar)
+                $.ajax({
+                    url: "php/conexion.php",
+                    type: "POST",
+                    data: {
+                        option: "DELETE",
+                        tipo: "isleta",
+                        id: idIsletaABorrar
+                    },
+                    success: function (response) {
+                        if (!($('#' + isletaId).closest('.isleta').attr('id'))) {
+                            $('#z' + document.closest('.zona').attr('id')).css({
+                                minHeight: "0px",
+                                minWidth: "0px"
+                            })
+                        }
+                        $('#' + isletaId).remove();
+                        idIsletaActiva = $('.isleta').attr('id');
+                        etiquetas_array = etiquetas_array.filter(etiqueta => etiqueta.id_isleta != idIsletaABorrar)
+                        isletas_array = isletas_array.filter(isleta => isleta.id != idIsletaABorrar)
+                        estadoBotones();
+                        actualizarNavbar();
+                        $.toast({
+                            heading: 'Se ha eliminado correctamente',
+                            showHideTransition: 'plain',
+                            icon: 'success'
+                        })
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText); // Manejar errores de la solicitud AJAX
+                    }
+                });
+                // Aquí puedes agregar la lógica para eliminar la isleta con el ID isletaId
+                console.log('Borrar isleta con ID:', isletaId);
+
+
+            } else {
+                $.toast({
+                    heading: 'Error',
+                    text: 'No se ha podido borrar el elemento, inténtelo de nuevo',
+                    icon: 'error'
+                })
+            }
+        });
+
+
+    }
+
+    function borrarEtiqueta(etiquetaId) {
+        idIsletaActiva = $(etiquetaId).closest('.isleta').attr('id');
+        var idIsleta = null
+        if (idIsletaActiva != null) {
+            idIsleta = idIsletaActiva.substring(1)
+        } else {
+            idIsleta = $("#" + etiquetaId).closest('.isleta').attr('id').substring(1)
+            idIsletaActiva = idIsleta
         }
-        if (editando) {
 
-        }
-        if (bloqueando) {
-            $(this).draggable('disable')
-            $(this).resizable('disable')
-            $(this).addClass('blocked')
-        } else if (!bloqueando) {
-            $(this).draggable('enable')
-            $(this).resizable('enable')
-            $(this).removeClass('blocked')
-            $('#' + idIsletaActiva).removeClass('isletaActiva');
-            $('#' + $(this).closest('.isleta').attr('id')).addClass('isletaActiva')
-            idIsletaActiva = $(this).closest('.isleta').attr('id');
-        }
-    })
-
-    $(document).on('click', '.zona', function () {
-
-        if (bloqueando) {
-            $(this).resizable('disable')
-            $(this).addClass('blocked')
-        } else if (!bloqueando) {
-            $(this).resizable('enable')
-            $(this).removeClass('blocked')
-            $('#' + idIsletaActiva).removeClass('zonaActiva');
-            $('#' + $(this).closest('.zona').attr('id')).addClass('zonaActiva')
-            idZonaActiva = $(this).closest('.zona').attr('id');
+        if (etiquetaId != null) {
+            etiquetaId = etiquetaId.substring(1)
         }
 
-    })
+        alertify.confirm('Está seguro que quiere borrar el elemento?', 'No se puede deshacer'
+            , function () {
+                $.ajax({
+                    url: "php/conexion.php",
+                    type: "GET",
+                    data: {
+                        option: "EliminarEtiqueta",
+                        id_isleta: idIsleta,
+                        id: etiquetaId
+                    },
+                    success: function (response) {
+                        idIsletaActiva = "i" + idIsleta;
+                        $('#e' + etiquetaId).remove();
+                        $('#i' + idIsleta).find('.etiqueta').remove();
+                        idEtiquetaActiva = null;
+                        $.ajax({
+                            url: "php/conexion.php",
+                            type: "GET",
+                            data: {
+                                option: "GetEtiquetasByIsletaID",
+                                tipo: "etiqueta",
+                                id_isleta: idIsleta,
+                            },
+                            success: function (etiquetas) {
+                                etiquetas_array = [];
+                                idIsletaActiva = "i" + idIsleta;
+                                var etiquetasInfo = JSON.parse(etiquetas);
+                                etiquetasInfo.forEach(function (etiqueta) {
+                                    var etiquetaAInsertar = $("<div class='etiqueta' id='e" + etiqueta.id + "'><p>" + etiqueta.nombre + "<br>(" + etiqueta.prefijo + "-" + etiqueta.posicion + ")</p></div>");
+                                    var mainContentWidth = $("#i" + idIsleta).width();
+                                    var mainContentHeight = $("#i" + idIsleta).height();
+                                    $("#i" + idIsleta).append(etiquetaAInsertar);
+                                    etiquetaAInsertar.css({
+                                        'display': 'flex',
+                                        'flex-direction': 'column',
+                                        'position': 'absolute',
+                                        'left': etiqueta.x + "px",
+                                        'top': etiqueta.y + "px",
+                                        maxHeight: mainContentHeight,
+                                        maxWidth: mainContentWidth,
+                                        'border': '2px solid yellow',
+                                        'border-radius': '5px',
+                                    }).draggable({
+                                        containment: "#i" + idIsleta
+                                    });
+                                    etiquetas_array.push(etiqueta);
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                console.log(error);
+                            }
+                        });
+                        actualizarNavbar();
 
-    $(document).on('click', '.ap', function () {
+                        $.toast({
+                            heading: 'Se ha eliminado correctamente',
+                            showHideTransition: 'plain',
+                            icon: 'success'
+                        })
+                    }, error: function (xhr, status, error) {
+                        console.log(error)
+                    }
+                })
+            },
+            function () {
+                $.toast({
+                    heading: 'Error',
+                    text: 'No se ha podido borrar el elemento, inténtelo de nuevo',
+                    icon: 'error'
+                })
 
-        if (bloqueando) {
-            $(this).draggable('disable')
-            $(this).addClass('blocked')
-        } else if (!bloqueando) {
-            $(this).draggable('enable')
-            $(this).removeClass('blocked')
-            $('#' + idIsletaActiva).removeClass('apActiva');
-            $('#' + $(this).closest('.ap').attr('id')).addClass('apActiva')
-            idApActivo = $(this).closest('.ap').attr('id');
-        }
-    })
+            });
 
-    $(document).on('click', '.etiqueta', function () {
 
-        if (bloqueando) {
-            $(this).draggable('disable')
-            $(this).addClass('blocked')
-        } else if (!bloqueando) {
-            $(this).draggable('enable')
-            $(this).removeClass('blocked')
-            $('#' + idIsletaActiva).removeClass('etiquetaActiva');
-            $('#' + $(this).closest('.etiqueta').attr('id')).addClass('etiquetaActiva')
-            idEtiquetaActiva = $(this).closest('.etiqueta').attr('id');
-        }
-    })
+    }
+
+    function borrarAP(apId) {
+        alertify.confirm('Está seguro que quiere borrar el elemento?', 'No se puede deshacer'
+            , function () {
+
+
+                $.ajax({
+                    url: "php/conexion.php",
+                    type: "POST",
+                    data: {
+                        option: "DELETE",
+                        tipo: "ap",
+                        id: apId.substring(2)
+                    },
+                    success: function (response) {
+                        $('#' + apId).remove();
+                        idApActivo = null;
+                        $.toast({
+                            heading: 'Éxito',
+                            text: 'Se ha borrado correctamente el ap',
+                            icon: 'success'
+                        })
+                        actualizarNavbar();
+                        estadoBotones();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText); // Manejar errores de la solicitud AJAX
+                    }
+                });
+
+
+            }
+            , function () {
+                $.toast({
+                    heading: 'Error',
+                    text: 'No se ha podido borrar el elemento, inténtelo de nuevo',
+                    icon: 'error'
+                })
+            });
+
+    }
+
     function estadoBotones() {
         if (idZonaActiva == null) {
             $('#añadirIsleta').prop('disabled', true);
@@ -107,53 +275,6 @@ document.addEventListener("DOMContentLoaded", function () {
             $('#añadirEtiqueta').prop('disabled', false);
             $('#añadirAP').prop('disabled', false);
         }
-    }
-
-    function obtenerEtiquetasPorIdIsleta(idIsleta) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: "php/conexion.php",
-                type: "GET",
-                data: {
-                    option: "GetEtiquetasByIsletaID",
-                    tipo: "etiqueta",
-                    id_isleta: idIsleta,
-                },
-                success: function (etiquetas) {
-                    etiquetas_array = [];
-                    idIsletaActiva = "i" + idIsleta;
-                    var etiquetasInfo = JSON.parse(etiquetas);
-                    etiquetasInfo.forEach(function (etiqueta) {
-                        var etiquetaAInsertar = $("<div class='etiqueta' id='e" + etiqueta.id + "'><div class='borrar-etiqueta' style='font-size: 22px'>x</div><p>" + etiqueta.nombre + "<br>(" + etiqueta.prefijo + "-" + etiqueta.posicion + ")</p></div>");
-                        var mainContentWidth = $("#i" + idIsleta).width();
-                        var mainContentHeight = $("#i" + idIsleta).height();
-                        $("#i" + idIsleta).append(etiquetaAInsertar);
-                        etiquetaAInsertar.css({
-                            'display': 'flex',
-                            'flex-direction': 'column',
-                            'position': 'absolute',
-                            'left': etiqueta.x + "px",
-                            'top': etiqueta.y + "px",
-                            maxHeight: mainContentHeight,
-                            maxWidth: mainContentWidth,
-                            'border': '2px solid yellow',
-                            'border-radius': '5px',
-                        }).draggable({
-                            containment: "#i" + idIsleta
-                        });
-                        etiquetas_array.push(etiqueta);
-                    });
-                    if(borrando){
-                        $('[class^="borrar-"]').css({
-                            display: 'block'
-                        })
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.log(error);
-                }
-            });
-        });
     }
 
     function actualizarNavbar() {
@@ -176,7 +297,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function mostrarZona(idZona) {
-
+        Swal.close();
         etiquetas_array = [];
         isletas_array = [];
         aps_array = [];
@@ -214,7 +335,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         $(".containerCentral").append(zona);
                         idZonaActiva = "z" + idZonaAMostrar;
 
-                        $('#nombreZonaNavbar').text("Plano: " + infoZona[0].nombre);
+                        $('#nombrePlanoNavbar').text("Plano: " + infoZona[0].nombre);
 
                         zona
                             .css({
@@ -229,10 +350,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         isletasArray.forEach(isleta => {
                             var ancho = 0
                             var alto = 0
-                            var isletaACrear = $("<div class='isleta' id='i" + isleta.id + "'><div class='borrar-isleta'>x</div><p>" + isleta.nombre + "(" + isleta.prefijo + ")</p></div>");
+                            var isletaACrear = $("<div class='isleta' id='i" + isleta.id + "'><p>" + isleta.nombre + "(" + isleta.prefijo + ")</p></div>");
                             idIsletaActiva = "i" + isleta.id;
                             if (isleta.redonda == 1) {
-                                var isletaACrear = $("<div class='isleta' id='i" + isleta.id + "'><div class='borrar-isleta' style='left: 50%;top: 0px'>x</div><p>" + isleta.nombre + "(" + isleta.prefijo + ")</p></div>");
+                                var isletaACrear = $("<div class='isleta' id='i" + isleta.id + "'><p>" + isleta.nombre + "(" + isleta.prefijo + ")</p></div>");
                                 isletaACrear.css({
                                     'border-radius': '50%',
                                     'overflow': 'visible',
@@ -288,7 +409,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                     idIsletaActiva = "i" + isleta.id;
                                     var etiquetasInfo = JSON.parse(etiquetas);
                                     etiquetasInfo.forEach(function (etiqueta) {
-                                        var etiquetaAInsertar = $("<div class='etiqueta' id='e" + etiqueta.id + "'><div class='borrar-etiqueta' style='font-size: 22px'>x</div><p>" + etiqueta.nombre + "<br>(" + etiqueta.prefijo + "-" + etiqueta.posicion + ")</p></div>");
+                                        var etiquetaAInsertar = $("<div class='etiqueta' id='e" + etiqueta.id + "'><p>" + etiqueta.nombre + "<br>(" + etiqueta.prefijo + "-" + etiqueta.posicion + ")</p></div>");
                                         var mainContentWidth = $("#i" + isleta.id).width();
                                         var mainContentHeight = $("#i" + isleta.id).height();
                                         $("#i" + isleta.id).append(etiquetaAInsertar);
@@ -308,11 +429,6 @@ document.addEventListener("DOMContentLoaded", function () {
                                         etiquetas_array.push(etiqueta);
 
                                     });
-                                    if(borrando){
-                                        $('[class^="borrar-"]').css({
-                                            display: 'block'
-                                        })
-                                    }
                                 },
                                 error: function (xhr, status, error) {
                                     console.log(error);
@@ -340,7 +456,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             success: function (response) {
                                 var aps = JSON.parse(response);
                                 aps.forEach(ap => {
-                                    var apACrear = $("<div class='ap' id='ap" + ap.id + "'><div class='borrar-ap'>x</div><p>" + ap.nombre + "</p></div>");
+                                    var apACrear = $("<div class='ap' id='ap" + ap.id + "'><p>" + ap.nombre + "</p></div>");
                                     var mainContentWidth = $("#z" + idZonaAMostrar).width();
                                     var mainContentHeight = $("#z" + idZonaAMostrar).height();
                                     $("#z" + idZonaAMostrar).append(apACrear);
@@ -393,8 +509,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 tipo: "zona",
             },
             success: function (response) {
+                $('.planos-popup').empty()
                 var zonasInfo = JSON.parse(response);
-                $(".containerDerecha").append("<ul class='list-group' id='zonas'></ul>");
+                $(".planos-popup").append("<ul class='list-group' id='zonas'></ul>");
                 zonasInfo.forEach(zona => {
                     var zonaEstructura = $("<div class='d-flex flex-column'><li class='list-group-item'><p class='zonasDerecha' style='font-size: 20px; height: 50px; display: flex; align-items: center;'><a class='mostrarZona" + zona.id + "'><i class='fa-solid fa-eye' ></i></a>" + zona.nombre + " <a class='eliminarZona ms-3' id='eliminarZona-" + zona.id + "'><i class='fa-solid fa-xmark' id='eliminarZonaDerecha'></i></a></p></li></div>");
                     $("#zonas").append(zonaEstructura);
@@ -403,9 +520,200 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    $(document).on('click', '.containerCentral', function (event) {
+        // Obtener todos los elementos en el punto del clic
+        var elementos = document.elementsFromPoint(event.clientX, event.clientY);
+        var zIndexMasAlto = -Infinity;
+
+        // Iterar sobre los elementos y encontrar el que tenga el zIndex más alto
+        elementos.forEach(function (elemento) {
+            // Obtener el zIndex del elemento actual
+            var zIndex = parseInt($(elemento).css('zIndex'));
+
+            // Verificar si el zIndex es válido y mayor que el actual máximo
+            if (!isNaN(zIndex) && zIndex > zIndexMasAlto) {
+                zIndexMasAlto = zIndex;
+                elementoConZIndexMasAlto = elemento;
+            }
+        });
+        console.log($(this))
+        if (elementoConZIndexMasAlto.id.substring(0, 1) == "e") {
+            $('#'+elementoConZIndexMasAlto.id).closest('.isleta').addClass('isletaActiva')
+            permitirBorradoEtiqueta = true;
+            $("#" + elementoConZIndexMasAlto.id).trigger('click');
+        } else if (elementoConZIndexMasAlto.id.substring(0, 1) == "i") {
+            $('#' + elementoConZIndexMasAlto.id).addClass('isletaActiva')
+            permitirBorradoIsleta = true;
+            $("#" + elementoConZIndexMasAlto.id).trigger('click');
+        }
+        elementoConZIndexMasAlto == null;
+
+        // Mostrar el elemento con el zIndex más alto
+        console.log("Elemento con el zIndex más alto:", elementoConZIndexMasAlto);
+    });
+
+    $(document).on('touchstart', '.containerCentral', function (event) {
+        var touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
+        var posX = touch.clientX;
+        var posY = touch.clientY;
+        var elementos = document.elementsFromPoint(posX, posY);
+
+        // Inicializar variables para el elemento con mayor zIndex
+
+        var zIndexMasAlto = -Infinity;
+
+        // Iterar sobre los elementos y encontrar el que tenga el zIndex más alto
+        elementos.forEach(function (elemento) {
+            // Obtener el zIndex del elemento actual
+            var zIndex = parseInt($(elemento).css('zIndex'));
+
+            // Verificar si el zIndex es válido y mayor que el actual máximo
+            if (!isNaN(zIndex) && zIndex > zIndexMasAlto) {
+                zIndexMasAlto = zIndex;
+                elementoConZIndexMasAlto = elemento;
+            }
+        });
+        if (elementoConZIndexMasAlto.id.substring(0, 1) == "e") {
+            $('#'+elementoConZIndexMasAlto.id).closest('.isleta').addClass('isletaActiva')
+            $('#' + idIsletaActiva).removeClass('isletaActiva')
+            permitirBorradoEtiqueta = true;
+            $("#" + elementoConZIndexMasAlto.id).trigger('click');
+        } else if (elementoConZIndexMasAlto.id.substring(0, 1) == "i") {
+            $('#' + elementoConZIndexMasAlto.id).addClass('isletaActiva')
+            permitirBorradoIsleta = true;
+            $("#" + elementoConZIndexMasAlto.id).trigger('click');
+        }
+        elementoConZIndexMasAlto == null;
+
+        // Mostrar el elemento con el zIndex más alto
+        console.log("Elemento con el zIndex más alto:", elementoConZIndexMasAlto);
+    });
+
+    $(document).on('touchend', '.isleta', function () {
+        $('#' + idIsletaActiva).removeClass('isletaActiva');
+        $('#' + $(this).attr('id')).addClass('isletaActiva')
+        idIsletaActiva = $(this).closest('.isleta').attr('id');
+    })
+
+    $(document).on('click', '.isleta', function () {
+        $('#' + idIsletaActiva).removeClass('isletaActiva');
+        $('#' + $(this).attr('id')).addClass('isletaActiva')
+        idIsletaActiva = $(this).closest('.isleta').attr('id');
+        if (permitirBorradoIsleta) {
+            if (borrando) {
+                borrarIsleta($(this).attr('id'));
+            }
+           
+            permitirBorradoIsleta = false;
+        }
+        if (editando) {
+
+        }
+        if (bloqueando) {
+            $(this).draggable('disable')
+            $(this).resizable('disable')
+            $(this).addClass('blocked')
+        } else if (!bloqueando) {
+            $(this).draggable('enable')
+            $(this).resizable('enable')
+            $(this).removeClass('blocked')
+
+        }
+
+    })
+
+    $(document).on('click', '.zona', function () {
+        $('#' + idZonaActiva).removeClass('zonaActiva');
+        $('#' + $(this).closest('.zona').attr('id')).addClass('zonaActiva')
+        idZonaActiva = $(this).closest('.zona').attr('id');
+        if (bloqueando) {
+            $(this).resizable('disable')
+            $(this).addClass('blocked')
+        } else if (!bloqueando) {
+            $(this).resizable('enable')
+            $(this).removeClass('blocked')
+
+        }
+
+    })
+
+    $(document).on('click', '.ap', function () {
+        $('#' + idIsletaActiva).removeClass('apActiva');
+        $('#' + $(this).closest('.ap').attr('id')).addClass('apActiva')
+        idApActivo = $(this).closest('.ap').attr('id');
+        if (borrando) {
+            borrarAP($(this).attr('id'))
+        }
+        if (bloqueando) {
+            $(this).draggable('disable')
+            $(this).addClass('blocked')
+        } else if (!bloqueando) {
+            $(this).draggable('enable')
+            $(this).removeClass('blocked')
+
+        }
+    })
+
+    $(document).on('click', '.etiqueta', function () {
+        $('#' + idIsletaActiva).removeClass('etiquetaActiva');
+        if (permitirBorradoEtiqueta) {
+            $('#' + idIsletaActiva).removeClass('etiquetaActiva');
+            $('#' + $(this).closest('.etiqueta').attr('id')).addClass('etiquetaActiva')
+            idEtiquetaActiva = $(this).closest('.etiqueta').attr('id');
+            if (borrando) {
+                borrarEtiqueta($(this).attr('id'));
+            }
+            if (bloqueando) {
+                $(this).draggable('disable')
+                $(this).addClass('blocked')
+            } else if (!bloqueando) {
+                $(this).draggable('enable')
+                $(this).removeClass('blocked')
+            }
+            permitirBorradoEtiqueta = false;
+        }
+
+    })
+
+    $(document).on('touchend', '.zona', function () {
+        $('#' + idIsletaActiva).removeClass('zonaActiva');
+        $('#' + $(this).closest('.zona').attr('id')).addClass('zonaActiva')
+        idZonaActiva = $(this).closest('.zona').attr('id');
+        if (bloqueando) {
+            $(this).resizable('disable')
+            $(this).addClass('blocked')
+        } else if (!bloqueando) {
+            $(this).resizable('enable')
+            $(this).removeClass('blocked')
+
+        }
+
+    })
+
+    $(document).on('touchend', '.ap', function () {
+        $('#' + idIsletaActiva).removeClass('apActiva');
+        $('#' + $(this).closest('.ap').attr('id')).addClass('apActiva')
+        idApActivo = $(this).closest('.ap').attr('id');
+        if (borrando) {
+            borrarAP($(this).attr('id'))
+        }
+        if (bloqueando) {
+            $(this).draggable('disable')
+            $(this).addClass('blocked')
+        } else if (!bloqueando) {
+            $(this).draggable('enable')
+            $(this).removeClass('blocked')
+
+        }
+    })
+
+
     //FORMULARIOS ASOCIADOS A LOS MODAL DE AÑADIR ELEMENTOS
 
     formZona.addEventListener("submit", function (event) {
+        //PRIMERO DESACTIVAMOS LAS OPCIONES DE BOORADO, EDICIÓN Y BLOQUEO
+
+
         //Reseteamos la zona activa
         if ($(".zona")) {
             $(".zona").removeClass("zonaActiva");
@@ -419,7 +727,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         nombreZona = document.getElementById("nombreZona").value
         //SACAMOS EL ANCHO Y EL ALTO DE LA ZONA
-        $('#nombreZonaNavbar').text("Plano: " + nombreZona);
+        $('#nombrePlanoNavbar').text("Plano: " + nombreZona);
         var mainContentWidthArea = $(".containerCentral").width();
         var mainContentHeightArea = $(".containerCentral").height();
 
@@ -455,7 +763,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 $('#z' + idZona).addClass("zonaActiva");
                 $('#añadirZonaModal').modal('hide');
                 idZonaActiva = "z" + idZona;
-                $('#nombreZonaNavbar').text("Plano: " + nombreZona);
+                $('#nombrePlanoNavbar').text("Plano: " + nombreZona);
                 $('#cantidadAPS').text("APs: 0");
                 $('#cantidadEtiquetas').text("ETEs: 0");
                 $('#cantidadIsletas').text("Isletas: 0");
@@ -471,6 +779,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     formIsleta.addEventListener("submit", function (event) {
+
         //Si no está en selección ninguna zona, no se podrá crear la isleta
         //Esto se podría hacer directamente que no muestre los botones, o que esten deshabilitados
         //y una vez que se cree la zona, se habiliten
@@ -487,23 +796,37 @@ document.addEventListener("DOMContentLoaded", function () {
         // Obtener los valores de los campos del formulario
         var nombreIsleta = document.getElementById("nombreIsleta").value;
         var prefijoEtiquetas = null;
-        if (document.getElementById("prefijoEtiquetas")) {
+        if ($("#prefijoEtiquetas").val().trim() == "") {
             prefijoEtiquetas = nombreIsleta.substring(0, 3).toUpperCase();
-            console.log(prefijoEtiquetas)
         } else {
             prefijoEtiquetas = document.getElementById("prefijoEtiquetas").value.toUpperCase();
         }
 
 
+        //Obtengo todos los parrafos de las isletas, su prefijo y lo comparo con el prefijo que se quiere añadir
         const elementosP = document.querySelectorAll('.isleta p');
 
         elementosP.forEach(elemento => {
-            const textoCompleto = elemento.textContent;
-            const prefijo = textoCompleto.match(/\((.*?)\)/)[1];
-            if (prefijo == prefijoEtiquetas && !prefijoEtiquetas.substring(3, 4)) {
-                prefijoEtiquetas = prefijoEtiquetas + "1";
-            } else if (prefijoEtiquetas.substring(3, 4) != null) {
-                prefijoEtiquetas = prefijoEtiquetas.substring(0, 3) + (parseInt(prefijo.substring(3, 4)) + 1)
+            console.log(elemento.closest('.isleta').id)
+            var textoCompleto = elemento.textContent;
+            var prefijo = textoCompleto.match(/\((.*?)\)/)[1];
+            var contador = 0;
+            console.log(prefijo + " y " + prefijoEtiquetas)
+            if (prefijo == prefijoEtiquetas) {
+                var contador = contador + 1;
+                if (!prefijoEtiquetas.substring(3, 4)) {
+                    prefijoEtiquetas = prefijoEtiquetas + "2";
+                    prefijo = prefijo + "1";
+                    $('#' + elemento.closest('.isleta').id).find('p').text(nombreIsleta + "<br>(" + prefijo + ")")
+                    
+                } else if (prefijoEtiquetas.substring(3, 4) != null) {
+
+                    prefijoEtiquetas = prefijoEtiquetas.substring(0, 3) + (parseInt(prefijo.substring(3, 4)) + 1)
+
+                } else if (prefijoEtiquetas.substring(0, 3) == prefijo.substring(0, 3)){
+                    prefijoEtiquetas = prefijoEtiquetas + contador;
+                }
+
             }
         });
 
@@ -532,13 +855,13 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             success: function (idIsleta) {
                 var isleta =
-                    $("<div class='isleta ' id='i" + idIsleta + "'><div class='borrar-isleta'>x</div><p>" + nombreIsleta + "<br>(" + prefijoEtiquetas + ")" + "</p></div>");
+                    $("<div class='isleta ' id='i" + idIsleta + "'><p>" + nombreIsleta + "<br>(" + prefijoEtiquetas + ")" + "</p></div>");
                 var mainContentWidth = $('#' + idZonaActiva).width();
                 var mainContentHeight = $("#" + idZonaActiva).height();
                 //AQUI HAY QUE SELECCIONAR A LA ZONA A LA QUE QUIERES
                 if (superficie == 1) {
 
-                    isleta = $("<div class='isleta' id='i" + idIsleta + "'><div class='borrar-isleta' style='left: 50%;top: 0px'>x</div><p>" + nombreIsleta + "<br>(" + prefijoEtiquetas + ")</p></div>");
+                    isleta = $("<div class='isleta' id='i" + idIsleta + "'><p>" + nombreIsleta + "<br>(" + prefijoEtiquetas + ")</p></div>");
 
 
                     isleta.css({
@@ -575,10 +898,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         'overflow': 'visible',
 
                     })
-
-                    $('.borrar-isleta').css({
-                        'text-shadow': '0px 0px 5px black'
-                    })
                 }
 
 
@@ -594,6 +913,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     height: 150,
                     width: 150,
                     redonda: superficie
+                })
+                $.ajax({
+                    url: "php/conexion.php",
+                    type: "UPDATE",
+                    data: {
+                        option: "",
+                        tipo: "isletaPrefijo",
+                        id_isleta: idIsleta,
+                    },
                 })
                 estadoBotones();
                 actualizarNavbar();
@@ -662,11 +990,21 @@ document.addEventListener("DOMContentLoaded", function () {
                         console.log(cantidadEtiquetasAAñadir + "AAAAAAAAAAAAAAAAAAa")
                         contadorId = idEtiqueta
 
-                        while (cantidadEtiquetasAAñadir > 0) {
-                            var etiqueta = $("<div class='etiqueta' id='e" + contadorId + "'><div class='borrar-etiqueta' style='font-size: 22px'>x</div><p>" + nombreEtiqueta + "<br>(" + prefijo[1] + "-" + posicion + ")" + "</p></div>");
+                        while (cantidadEtiquetasAAñadir >= 0) {
                             var mainContentWidth = $("#" + idIsletaActiva).width();
                             var mainContentHeight = $("#" + idIsletaActiva).height();
+
+                            if (cantidadEtiquetasAAñadir != 1) {
+                                var cantidadColumnas = mainContentWidth / cantidadEtiquetasAAñadir
+                            }
                             $("#i" + idIsletaActiva).append(etiqueta);
+                            if (borrando) {
+                                var etiqueta = $("<div class='etiqueta' id='e" + contadorId + "'><p>" + nombreEtiqueta + "<br>(" + prefijo[1] + "-" + posicion + ")" + "</p></div>");
+
+                            } else {
+                                var etiqueta = $("<div class='etiqueta' id='e" + contadorId + "'><p>" + nombreEtiqueta + "<br>(" + prefijo[1] + "-" + posicion + ")" + "</p></div>");
+                            }
+
                             etiqueta
                                 .css({
                                     'display': 'flex',
@@ -676,11 +1014,14 @@ document.addEventListener("DOMContentLoaded", function () {
                                     maxWidth: mainContentWidth,
                                     'border': '2px solid yellow',
                                     'border-radius': '5px',
+                                    'top': '10px',
+                                    'left': '10px',
 
                                 })
                                 .draggable({
                                     containment: "#i" + idIsletaActiva,
                                 })
+
                             $('#añadirEtiquetaModal').modal('hide');
                             $('#e' + idEtiqueta).addClass("etiquetaActiva");
                             etiquetas_array.push({
@@ -738,7 +1079,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 var mainContentWidth = $("#" + idZonaActiva).width();
                 var mainContentHeight = $("#" + idZonaActiva).height();
 
-                var ap = $("<div class='ap' id='ap" + idAP + "'><div class='borrar-ap'>x</div><p>" + nombreAP + "</p></div>");
+                var ap = $("<div class='ap' id='ap" + idAP + "'><p>" + nombreAP + "</p></div>");
                 $("#" + idZonaActiva).append(ap);
                 ap
                     .css({
@@ -798,8 +1139,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                                 var posicionXFinal = elemento.width() * proporcionalidadX;
                                 var posicionYFinal = elemento.height() * proporcionalidadY;
+                                console.log('la posicion X: ' + posicionXFinal + ' la posicion Y: ' + posicionYFinal)
                                 $('#e' + etiqueta.id).css({
-
                                     left: posicionXFinal + "px",
                                     top: posicionYFinal + "px",
                                 })
@@ -922,12 +1263,48 @@ document.addEventListener("DOMContentLoaded", function () {
     //Funcion para mostrar la zona con todos los elementos
 
     $(document).on('click', '[class^="mostrarZona"]', function () {
+        estadoHerramientas(true, true, true)
         var zonaAMostrar = $(this).attr('class').substring(11);
         mostrarZona("z" + zonaAMostrar);
         idZonaActiva = zonaAMostrar;
     });
 
     $(document).on('click', '#añadirEtiqueta', function () {
+        estadoHerramientas(true, true, true)
+        if (idZonaActiva != null) {
+            $.ajax({
+                url: "php/conexion.php",
+                type: "GET",
+                data: {
+                    option: "getIsletasByZonaID",
+                    id_zona: idZonaActiva.substring(1),
+                },
+                success: function (response) {
+                    var isletas = JSON.parse(response);
+                    console.log(isletas)
+                    var selectIsleta = $("#isletaPerteneciente");
+                    selectIsleta.empty();
+                    isletas.forEach(isleta => {
+                        if (idIsletaActiva != null && isleta.id == idIsletaActiva.substring(1)) {
+                            selectIsleta.append('<option value="' + isleta.id + '" selected>' + isleta.prefijo + "(preseleccionado)</option>'");
+                        } else {
+                            selectIsleta.append('<option value="' + isleta.id + '">' + isleta.prefijo + '</option>');
+                        }
+
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr, status, error)
+                }
+            })
+        } else {
+            alert("No hay ninguna zona activa")
+        }
+
+    });
+
+    $(document).on('touchstart', '#añadirEtiqueta', function () {
+        estadoHerramientas(true, true, true)
         if (idZonaActiva != null) {
             $.ajax({
                 url: "php/conexion.php",
@@ -960,6 +1337,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
+    $(document).on('click', '#añadirIsleta', function () {
+        estadoHerramientas(true, true, true)
+    })
+    $(document).on('click', '#añadirAP', function () {
+        estadoHerramientas(true, true, true)
+    })
+
     $(document).on('click', '.eliminarZona', function () {
 
         var idZona = $(this).attr('id');
@@ -971,8 +1355,16 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         idZona = idZona.substring(13);
 
-        alertify.confirm('Está seguro que quiere borrar el elemento?', 'Confirm Message'
-            , function () {
+        Swal.fire({
+            title: "Borrar la zona " + $(this).closest('.zonasDerecha').text().trim() + "?",
+            text: "NO SE PUEDE DESHACER",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, borralo"
+        }).then((result) => {
+            if (result.isConfirmed) {
                 $.ajax({
                     url: "php/conexion.php",
                     type: "POST",
@@ -993,239 +1385,33 @@ document.addEventListener("DOMContentLoaded", function () {
                         $(".containerDerecha").empty();
                         getZonas();
                         estadoBotones();
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(xhr.responseText); // Manejar errores de la solicitud AJAX
-                    }
-                });
-            },
-            function () {
-                $.toast({
-                    heading: 'Error',
-                    text: 'No se ha podido borrar el elemento, inténtelo de nuevo',
-                    icon: 'error'
-                })
-            });
-    });
-
-    $(document).on('click', '.borrar-isleta', function () {
-        var isletaId = $(this).closest('.isleta').attr('id');
-        alertify.confirm('Está seguro que quiere borrar el elemento?', 'No se puede deshacer'
-            , function () {
-                idIsletaABorrar = isletaId.substring(1);
-                console.log(idIsletaABorrar)
-                $.ajax({
-                    url: "php/conexion.php",
-                    type: "POST",
-                    data: {
-                        option: "DELETE",
-                        tipo: "isleta",
-                        id: idIsletaABorrar
-                    },
-                    success: function (response) {
-                        if (!($('#' + isletaId).closest('.isleta').attr('id'))) {
-                            $('#z' + document.closest('.zona').attr('id')).css({
-                                minHeight: "0px",
-                                minWidth: "0px"
-                            })
-                        }
-                        $('#' + isletaId).remove();
-                        idIsletaActiva = $('.isleta').attr('id');
-                        etiquetas_array = etiquetas_array.filter(etiqueta => etiqueta.id_isleta != idIsletaABorrar)
-                        isletas_array = isletas_array.filter(isleta => isleta.id != idIsletaABorrar)
-                        estadoBotones();
-                        actualizarNavbar();
-                        $.toast({
-                            heading: 'Se ha eliminado correctamente',
-                            showHideTransition: 'plain',
-                            icon: 'success'
-                        })
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(xhr.responseText); // Manejar errores de la solicitud AJAX
-                    }
-                });
-                // Aquí puedes agregar la lógica para eliminar la isleta con el ID isletaId
-                console.log('Borrar isleta con ID:', isletaId);
-                // Por ejemplo, puedes usar jQuery para eliminar la isleta del DOM
-
-
-
-            }
-            , function () {
-                $.toast({
-                    heading: 'Error',
-                    text: 'No se ha podido borrar el elemento, inténtelo de nuevo',
-                    icon: 'error'
-                })
-            });
-
-
-
-
-
-
-
-
-    });
-
-    $(document).on('click', '.borrar-etiqueta', function () {
-        var etiquetaId = $(this).closest('.etiqueta').attr('id');
-        idIsletaActiva = $(this).closest('.isleta').attr('id');
-        var idIsleta = null
-        if (idIsletaActiva != null) {
-            idIsleta = idIsletaActiva.substring(1)
-        } else {
-            idIsleta = $(this).closest('.isleta').attr('id').substring(1)
-            console.log("Agarrada de la base de datos" + idIsleta)
-        }
-        if (etiquetaId != null) {
-            etiquetaId = etiquetaId.substring(1)
-        }
-
-        alertify.confirm('Está seguro que quiere borrar el elemento?', 'No se puede deshacer'
-            , function () {
-
-                $.ajax({
-                    url: "php/conexion.php",
-                    type: "GET",
-                    data: {
-                        option: "EliminarEtiqueta",
-                        id_isleta: idIsleta,
-                        id: etiquetaId
-                    },
-                    success: function (response) {
-                        idIsletaActiva = "i" + idIsleta;
-                        $('#e' + etiquetaId).remove();
-                        $('#i' + idIsleta).find('.etiqueta').remove();
-                        idEtiquetaActiva = null;
-                        obtenerEtiquetasPorIdIsleta(idIsleta)
-                            .then(function (Etiquetas) {
-                                $('#i' + idIsleta).addClass("isletaActiva");
-                                $('#i' + idIsleta).empty();
-                                var etiquetasInfo = JSON.parse(Etiquetas);
-                                etiquetasInfo.forEach(etiqueta => {
-                                    $('#e' + etiquetaId).remove();
-                                    if(borrando){
-                                        var etiquetaAInsertar = $("<div class='etiqueta' id='e" + etiqueta.id + "'><div class='borrar-etiqueta' style='font-size: 22px; display: block'>x</div><p>" + etiqueta.nombre + "<br>(" + etiqueta.prefijo + "-" + etiqueta.posicion + ")</p></div>");
-                                   
-                                    } else {
-                                        var etiquetaAInsertar = $("<div class='etiqueta' id='e" + etiqueta.id + "'><div class='borrar-etiqueta' style='font-size: 22px'>x</div><p>" + etiqueta.nombre + "<br>(" + etiqueta.prefijo + "-" + etiqueta.posicion + ")</p></div>");
-                                   
-                                    }
-                                     var mainContentWidth = $("#i" + isleta.id).width();
-                                    var mainContentHeight = $("#i" + isleta.id).height();
-
-                                    $("#i" + isleta.id).append(etiquetaAInsertar);
-                                    etiquetaAInsertar
-                                        .css({
-                                            'display': 'flex',
-                                            'flex-direction': 'column',
-                                            'position': 'absolute',
-                                            'left': etiqueta.x + "px",
-                                            'top': etiqueta.y + "px",
-                                            maxHeight: mainContentHeight,
-                                            maxWidth: mainContentWidth,
-                                            'border': '2px solid yellow',
-                                            'border-radius': '5px',
-                                        })
-                                        .draggable({
-                                            containment: "#i" + isleta.id
-                                        })
-                                }
-                                );        
-                            })
-                            .catch(function (xhr, status, error) {
-                                console.log(error)
-                            });
-                        actualizarNavbar();
-
-                        $.toast({
-                            heading: 'Se ha eliminado correctamente',
-                            showHideTransition: 'plain',
-                            icon: 'success'
-                        })
-                    }, error: function (xhr, status, error) {
-                        console.log(error)
-                    }
-                })
-            },
-            function () {
-                $.toast({
-                    heading: 'Error',
-                    text: 'No se ha podido borrar el elemento, inténtelo de nuevo',
-                    icon: 'error'
-                })
-
-            });
-
-    });
-
-    $(document).on('click', '.borrar-ap', function () {
-        var apId = $(this).closest('.ap').attr('id');
-        alertify.confirm('Está seguro que quiere borrar el elemento?', 'No se puede deshacer'
-            , function () {
-
-
-                $.ajax({
-                    url: "php/conexion.php",
-                    type: "POST",
-                    data: {
-                        option: "DELETE",
-                        tipo: "ap",
-                        id: apId.substring(2)
-                    },
-                    success: function (response) {
-                        $('#' + apId).remove();
-                        idApActivo = null;
                         $.toast({
                             heading: 'Éxito',
-                            text: 'Se ha borrado correctamente el ap',
+                            text: 'Se ha borrado correctamente la zona',
                             icon: 'success'
                         })
-                        actualizarNavbar();
-                        estadoBotones();
                     },
                     error: function (xhr, status, error) {
                         console.error(xhr.responseText); // Manejar errores de la solicitud AJAX
                     }
                 });
-
-
-            }
-            , function () {
+            } else {
                 $.toast({
                     heading: 'Error',
-                    text: 'No se ha podido borrar el elemento, inténtelo de nuevo',
+                    text: 'No se ha podido borrar la zona, inténtelo de nuevo',
                     icon: 'error'
                 })
-            });
-
-
-
+            }
+        })
     });
 
     $(document).on('click', '.activarBorrado', function () {
+        $(this).addClass('expandiendo')
+        estadoHerramientas(false, true, true)
+
         if (borrando) {
-            borrando = false;
-            $('[class^="borrar-"]').css({
-                display: 'none'
-            })
-            $('.activarBorrado')
-                .css({
-                    'background-color': 'transparent'
-
-                })
-            $.toast({
-                heading: 'Desactivando el borrado',
-                showHideTransition: 'plain',
-                icon: 'info'
-            })
-
+            estadoHerramientas(true, false, false)
         } else {
-            $('[class^="borrar-"]').css({
-                display: 'block'
-            })
             $('.activarBorrado')
                 .css({
                     'background-color': 'lightcoral'
@@ -1240,19 +1426,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
+
     $(document).on('click', '.activarBloqueo', function () {
+        $(this).addClass('expandiendo')
+        estadoHerramientas(true, true, false)
         if (bloqueando) {
-            bloqueando = false;
+            estadoHerramientas(false, false, true)
+        } else {
             $('.activarBloqueo')
                 .css({
-                    'background-color': 'transparent'
-
+                    'background-color': 'lightblue'
                 })
+            bloqueando = true;
             $.toast({
-                heading: 'Desactivando el bloqueo',
+                heading: 'Activando el bloqueo',
                 showHideTransition: 'plain',
-                icon: 'info'
+                icon: 'warning'
             })
+        }
+    });
+
+    $(document).on('touchend', '.activarBloqueo', function () {
+        $(this).addClass('expandiendo')
+        estadoHerramientas(true, true, false)
+        if (bloqueando) {
+            estadoHerramientas(false, false, true)
         } else {
             $('.activarBloqueo')
                 .css({
@@ -1268,23 +1466,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     $(document).on('click', '.activarEditado', function () {
-
+        $(this).addClass('expandiendo')
+        estadoHerramientas(true, false, true)
         if (editando) {
-            editando = false;
-            $('[class^="editar-"]').css({
-                display: 'none'
-            })
-            $('.activarEditado')
-                .css({
-                    'background-color': 'transparent'
-
-                })
-            $.toast({
-                heading: 'Se ha bloqueado la edición',
-                showHideTransition: 'plain',
-                icon: 'warning'
-            })
-
+            estadoHerramientas(false, true, false)
         } else {
             $('[class^="editar-"]').css({
                 display: 'block'
@@ -1302,6 +1487,38 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     })
 
+    $(document).on('click', '#planos', function () {
+        var posicionXInicialModal = $(this).width() + $(this).position().left;
+        var posicionYInicialModal = $(this).height() + $(this).position().top;
+        getZonas()
+        Swal.fire({
+            showConfirmButton: false,
+            customClass: {
+                popup: 'planos-popup',
+            }
+        }).then((result) => {
+            $('.planos-popup').css({
+                'top': posicionXInicialModal + 'px',
+                'left': posicionYInicialModal + ' +px'
+            })
+
+        });
+    });
+
+    $(document).on('click', '#maximixe', function () {
+        if (requestFullScreen) {
+            requestFullScreen.call(elem);
+        }
+        if (exitFullScreen) {
+            exitFullScreen.call(document);
+        }
+
+    })
+
+    //PARA DESHABILITAR LAS ZONAS ACTIVAS AL HACER CLICK EN OTRO LADO
+
+
+
     //Si no hay ninguna zona deshabilitar los botones de añadir isleta, etiqueta y ap
 
 
@@ -1309,7 +1526,7 @@ document.addEventListener("DOMContentLoaded", function () {
     //se puede saber cuando se 
 
 
-    getZonas();
+
     estadoBotones();
 
 });

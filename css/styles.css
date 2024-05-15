@@ -1,5 +1,3 @@
-
-
 .containerCentral {
     background-color: #e5e5f7;
     opacity: 0.8;
@@ -7,19 +5,10 @@
     background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
     background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
     width: 1000px;
-    height: 77vh;
+    height: 92vh;
+    border-radius: 1%;
 }
 
-footer {
-    margin-top: auto;
-    /* Empuja el footer hacia abajo para que se pegue al fondo */
-    background-color: lightgrey;
-    /* Color de fondo del footer */
-    color: #fff;
-    /* Color de texto del footer */
-    padding: 10px;
-    /* Espaciado interior del footer */
-}
 
 .contenidoTienda {
     min-width: 100%;
@@ -36,10 +25,10 @@ footer {
     height: 144px;
     margin: 10px;
     overflow: hidden;
-    color: white    ;
+    color: white;
     border: 2px solid black;
     border-radius: 10px;
-    
+    z-index: 10;
 }
 
 /*
@@ -49,29 +38,34 @@ DE ETIQUETAS ELECTRONICAS (ETE)
 #title
 */
 
+nav{
+    padding-top: 4px;
+    background-color: rgb(99, 99, 207);
+}
 
-#nombreZonaNavbar{
+
+#nombrePlanoNavbar {
     color: white;
     text-shadow: 0px 0px 10px black;
     font-size: 2em;
     margin-top: 10px;
 }
 
-#cantidadAPS{
+#cantidadAPS {
     color: white;
     text-shadow: 0px 0px 10px black;
     font-size: 2em;
     margin-top: 10px;
 }
 
-#cantidadEtiquetas{
+#cantidadEtiquetas {
     color: white;
     text-shadow: 0px 0px 10px black;
     font-size: 2em;
     margin-top: 10px;
 }
 
-#cantidadIsletas{
+#cantidadIsletas {
     color: white;
     text-shadow: 0px 0px 10px black;
     font-size: 2em;
@@ -80,13 +74,24 @@ DE ETIQUETAS ELECTRONICAS (ETE)
 }
 
 
-#tools{
+#tools {
     text-shadow: 0px 0px 2px black;
     font-size: 1.5em;
 }
 
+#añadirIsleta{
+    background-color: #F7D445;
+}
 
-#eliminarZonaDerecha{
+#añadirEtiqueta{
+    background-color: #F7D445;
+}
+
+#añadirAP{
+    background-color: #F7D445;
+}
+
+#eliminarZonaDerecha {
     color: red;
     text-shadow: 1px 1px 1px #ccc;
     font-size: 1.5em;
@@ -97,10 +102,14 @@ DE ETIQUETAS ELECTRONICAS (ETE)
     #editarElemento {
         color: transparent;
         /* Hace que el texto sea transparente */
-        /* Color de fondo del elemento que contiene el texto 
+/* Color de fondo del elemento que contiene el texto 
         
 */
-    
+.isleta>p {
+    color: white;
+    text-shadow: black 0px 0px 7px;
+    z-index: 10;
+}
 
 .coordenadas {
     color: white;
@@ -111,10 +120,14 @@ DE ETIQUETAS ELECTRONICAS (ETE)
     color: white;
 }
 
-.zonasDerecha{
-    display: flex; /* Hace que los elementos se alineen en una fila */
-    align-items: center; /* Centra verticalmente los elementos */
-    justify-content: center; 
+
+
+.zonasDerecha {
+    display: flex;
+    /* Hace que los elementos se alineen en una fila */
+    align-items: center;
+    /* Centra verticalmente los elementos */
+    justify-content: center;
 }
 
 .zona {
@@ -131,7 +144,8 @@ DE ETIQUETAS ELECTRONICAS (ETE)
 }
 
 .zonaActiva {
-    background-color: rgba(237, 237, 26, 0.808);
+    background-color: #f7d345d4;
+    border: #79672280 solid 3px;
 }
 
 .isletaActiva {
@@ -140,7 +154,7 @@ DE ETIQUETAS ELECTRONICAS (ETE)
     text-shadow: 0px 0px 10px black;
 }
 
-.etiquetaActiva{
+.etiquetaActiva {
     background-color: rgba(69, 10, 207, 0.856);
 }
 
@@ -152,40 +166,14 @@ DE ETIQUETAS ELECTRONICAS (ETE)
     border-radius: 5px;
     width: 55px;
     height: 50px;
+    z-index: 17;
 }
-.etiqueta  p{
+
+.etiqueta p {
     font-size: 12px;
 }
 
-
-.borrar-isleta{
-    /* Alinear arriba a la derecha*/
-    font-weight: bold;
-    color: red;
-    position: absolute;
-    top: -7px;
-    right: 5px;
-    font-size: 20px;
-    cursor: pointer;
-    display: none;
-    /* Ocultar inicialmente */
-
-}
-.borrar-etiqueta {
-    /* Alinear arriba a la derecha*/
-    position: absolute;
-    top: -12px;
-    right: 1px;
-    font-size: 20px;
-    color: red;
-    cursor: pointer;
-    display: none;
-    font-weight: bold;
-    /* Ocultar inicialmente */
-
-}
-
-.editar-isleta{
+.editar-isleta {
     /* Alinear arriba a la izquierda*/
     position: absolute;
     top: -7px;
@@ -212,7 +200,7 @@ DE ETIQUETAS ELECTRONICAS (ETE)
 
 }
 
-.editar-ap{
+.editar-ap {
     /* Alinear arriba a la izquierda*/
     position: absolute;
     top: -12px;
@@ -228,7 +216,7 @@ DE ETIQUETAS ELECTRONICAS (ETE)
 
 
 
-.ap{
+.ap {
     display: flex;
     background-color: rgba(48, 48, 183, 0.744);
     font-size: 12px;
@@ -239,38 +227,131 @@ DE ETIQUETAS ELECTRONICAS (ETE)
     box-shadow: 3px 2px 5px black;
 }
 
-.añadirElemento{
+.añadirElemento {
     display: flex;
     align-items: center;
     justify-content: center;
     vertical-align: auto;
 }
 
-.borrar-ap{
-    position: absolute;
-    top: -20px;
-    right: 0px;
-    font-size: 24px;
-    font-weight: bold;
-    color: red;
-    cursor: pointer;
-    display: none;
-    /* Ocultar inicialmente */
+#añadirZonaBoton {
+    transform: rotate(45deg);
+    color: #F7D445;
+    font-size: 2.4em;
+    margin-bottom: 4px;
 }
 
-.btnTool{
+.btnTool {
     min-height: 56px;
     min-width: 56px;
 }
 
+.containerIzquierda{
+    background-color: rgb(99, 99, 207);
+    padding: 0px 3px 0px 3px;
+    margin-top: -9px
+}
 
+
+.blocked {
+    border: 4px solid yellow;
+}
+
+
+.ui-icon-gripsmall-diagonal-se {
+    border: 5px solid black
+}
+
+#plantillasTools{
+    flex-direction: row;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-color: #444df777;
+}
+#plantillasTools>button{
+    height: 56px;
+    color: #F7D445;
+}
+
+
+#moreTools {
+    flex-direction: row;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-color: #444df777;
+}
+
+#moreTools> button {
+    height: 56px;
+    color: #F7D445;
+}
+
+
+
+#herramientas{
+    min-width: 67px;
+}
+
+#herramientas > div > div > button {
+      font-weight: 500;
+}
+
+.isleta > p{
+    pointer-events: none;
+}
+
+
+
+ 
+
+#maximize{
+    position: fixed;
+    top: 0;
+    right: 0;
+    margin-top: 10px; /* Opcional: ajusta el margen superior para evitar que el elemento esté pegado al borde */
+    margin-right: 10px; /* Opcional: ajusta el margen derecho para evitar que el elemento esté pegado al borde */
+    transform: translate(-100%, 0);
+}
+
+.activarEditado{
+    transition: width 10s ease;
+}
+.activarBorrado{
+    transition: width 10s ease;
+}
+.activarBloqueado{
+    transition: width 10s ease;
+}
+
+
+
+
+@media (max-width: 792px) {
+    #herramientas{
+        width: 10%
+    }
+    #plantillasTools{
+        width: 10%;
+    }
+
+    #containerAreas{
+        width: 90%
+    }
+}
+
+@media (max-width: 1511px) {
+    #moreTools {
+        flex-direction: column;
+    }
+    #plantillasTools {
+        flex-direction: column;
+    
+    }
+}
 
 @media (max-width: 666px) {
     .containerCentral {
         left: 999px
     }
-  }
+}
 
-  .blocked{
-    border: 4px solid yellow;
-  }

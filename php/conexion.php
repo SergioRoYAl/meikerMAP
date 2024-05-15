@@ -116,6 +116,13 @@ if (isset($_POST['option'])) {
                         $stmt->bindParam(':y', $_POST['y']);
                         $stmt->execute();
                         break;
+                    case 'isletaPrefijo':
+                        $sql = "UPDATE isleta SET prefijo = :prefijo where id = :id";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bindParam(':id', $_POST['id']);
+                        $stmt->bindParam(':prefijo', $_POST['prefijo']);
+                        $stmt->execute();
+                        break;
                     case 'zona':
                         $sql = "UPDATE $tipo SET height = :height, width = :width where id = :id";
                         $stmt = $conn->prepare($sql);

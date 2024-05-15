@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-04-2024 a las 09:05:42
+-- Tiempo de generación: 07-05-2024 a las 14:52:58
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -57,7 +57,25 @@ CREATE TABLE `etiqueta` (
 --
 
 INSERT INTO `etiqueta` (`id`, `nombre`, `mac`, `x`, `y`, `id_isleta`, `prefijo`, `posicion`) VALUES
-(78, '', 'cg22asas', 95, 39, 27, 'GAA', 0);
+(2020, '', '00:00:00:00:00:00', 103, 86, 313, 'LLL', 1),
+(2060, '', '00:00:00:00:00:00', 262, 183, 314, 'GAAN', 1),
+(2063, '', '00:00:00:00:00:00', 500, 193, 314, 'GAAN', 2),
+(2064, '', '00:00:00:00:00:00', 375, 78, 314, 'GAAN', 3),
+(2067, '', '00:00:00:00:00:00', 151, 325, 314, 'GAAN', 4),
+(2068, '', '00:00:00:00:00:00', 328, 299, 314, 'GAAN', 5),
+(2069, '', '00:00:00:00:00:00', 455, 277, 314, 'GAAN', 6),
+(2070, '', '00:00:00:00:00:00', 177, 86, 313, 'LLL', 2),
+(2071, '', '00:00:00:00:00:00', 6, 86, 313, 'LLL', 3),
+(2074, '', '00:00:00:00:00:00', 193, 12, 313, 'LLL', 4),
+(2075, '', '00:00:00:00:00:00', 230, 175, 315, 'GAAN', 1),
+(2076, '', '00:00:00:00:00:00', 453, 226, 315, 'GAAN', 2),
+(2077, '', '00:00:00:00:00:00', 456, 90, 315, 'GAAN', 3),
+(2079, '', '00:00:00:00:00:00', 85, 98, 315, 'GAAN', 4),
+(2080, '', '00:00:00:00:00:00', 49, 213, 315, 'GAAN', 5),
+(2081, '', '00:00:00:00:00:00', 51, 290, 315, 'GAAN', 6),
+(2082, '', '00:00:00:00:00:00', 158, 316, 315, 'GAAN', 7),
+(2083, '', '00:00:00:00:00:00', 298, 303, 315, 'GAAN', 8),
+(2084, '', '00:00:00:00:00:00', 430, 296, 315, 'GAAN', 9);
 
 -- --------------------------------------------------------
 
@@ -82,24 +100,10 @@ CREATE TABLE `isleta` (
 --
 
 INSERT INTO `isleta` (`id`, `nombre`, `height`, `width`, `x`, `y`, `id_zona`, `prefijo`, `redonda`) VALUES
-(22, 'Primero', 141, 253, 41, 39, 106, 'PRI', 0),
-(23, 'Segundo', 138, 438, 381, 30, 106, 'SEG', 0),
-(24, 'Tercero', 243, 645, 3, 248, 106, 'TER', 0),
-(26, 'Happy', 141, 253, 103, 92, 107, 'HPY', 0),
-(27, 'Happy', 129, 241, 569, 325, 107, 'GAA', 0),
-(42, '', 0, 0, 0, 0, 0, '', 1),
-(44, 'ewe', 141, 253, 123, 62, 110, 'DSD', 0),
-(45, 'ewe', 141, 253, 415, 38, 110, 'QEQ', 0),
-(49, 'qqq', 185, 197, 315, 98, 109, 'WWQ', 1),
-(50, 'Caliente', 141, 253, 424, 29, 112, 'CAL', 0),
-(51, 'Frio', 141, 253, 52, 31, 112, 'FRI', 1),
-(54, 'dww', 138, 250, 234, 260, 111, 'WDW', 0),
-(55, 'dww', 146, 174, 206, 92, 111, 'GHD', 0),
-(57, '', 156, 343, 413, 49, 111, 'BAA', 1),
-(58, '', 150, 150, 0, 0, 113, 'WDQ', 1),
-(60, 'F3', 97, 97, 114, 80, 115, '311', 0),
-(61, 'F3', 127, 251, 587, 148, 115, 'VBA', 0),
-(62, '', 150, 150, 0, 0, 0, 'FAA', 1);
+(312, 'Holaaa', 191, 331, 559, 237, 241, 'HOL', 0),
+(313, 'llll', 132, 244, 424, 94, 242, 'LLL', 0),
+(314, 'gaaa', 421, 566, 743, 112, 242, 'GAAN', 0),
+(315, 'gaaa', 404, 539, 135, 245, 242, 'GAAN', 0);
 
 -- --------------------------------------------------------
 
@@ -119,7 +123,9 @@ CREATE TABLE `zona` (
 --
 
 INSERT INTO `zona` (`id`, `nombre`, `height`, `width`) VALUES
-(115, 'HOLAA', 475, 950);
+(241, 'PepeZone', 721, 1533),
+(242, '', 763, 1760),
+(243, '', 678, 1134);
 
 --
 -- Índices para tablas volcadas
@@ -130,14 +136,14 @@ INSERT INTO `zona` (`id`, `nombre`, `height`, `width`) VALUES
 --
 ALTER TABLE `ap`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_ap_a_zona` (`id_zona`);
+  ADD KEY `fk_ap_zona` (`id_zona`);
 
 --
 -- Indices de la tabla `etiqueta`
 --
 ALTER TABLE `etiqueta`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_etiqueta_a_zona` (`id_isleta`);
+  ADD KEY `fk_etiqueta_isleta` (`id_isleta`);
 
 --
 -- Indices de la tabla `isleta`
@@ -157,22 +163,28 @@ ALTER TABLE `zona`
 --
 
 --
+-- AUTO_INCREMENT de la tabla `ap`
+--
+ALTER TABLE `ap`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+
+--
 -- AUTO_INCREMENT de la tabla `etiqueta`
 --
 ALTER TABLE `etiqueta`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2085;
 
 --
 -- AUTO_INCREMENT de la tabla `isleta`
 --
 ALTER TABLE `isleta`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=319;
 
 --
 -- AUTO_INCREMENT de la tabla `zona`
 --
 ALTER TABLE `zona`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=244;
 
 --
 -- Restricciones para tablas volcadas
@@ -182,13 +194,19 @@ ALTER TABLE `zona`
 -- Filtros para la tabla `ap`
 --
 ALTER TABLE `ap`
-  ADD CONSTRAINT `fk_ap_a_zona` FOREIGN KEY (`id_zona`) REFERENCES `zona` (`id`);
+  ADD CONSTRAINT `fk_ap_zona` FOREIGN KEY (`id_zona`) REFERENCES `zona` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `etiqueta`
 --
 ALTER TABLE `etiqueta`
-  ADD CONSTRAINT `fk_etiqueta_a_zona` FOREIGN KEY (`id_isleta`) REFERENCES `isleta` (`id`);
+  ADD CONSTRAINT `fk_etiqueta_isleta` FOREIGN KEY (`id_isleta`) REFERENCES `isleta` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `isleta`
+--
+ALTER TABLE `isleta`
+  ADD CONSTRAINT `fk_isleta_zona` FOREIGN KEY (`id_zona`) REFERENCES `zona` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

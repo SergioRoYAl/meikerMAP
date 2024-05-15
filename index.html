@@ -7,20 +7,27 @@
     <title>Plano del Buffet</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/jquery.ui.css">
+    <link rel="stylesheet" href="css/jquery-ui.min.css">
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="icon" type="image/ico" href="favicon.ico" />
     <link rel="stylesheet" href="css/alertify.css">
     <link rel="stylesheet" href="css/alertify.min.css">
     <link rel="stylesheet" href="css/jquery.toast.min.css">
-
+    <link rel="stylesheet" href="css/jquery-ui.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 </head>
 
 <body>
-    <nav style="background-color: rgb(99, 99, 207);">
+    <nav>
         <div class="d-flex flex-row">
-
             <div class="col-3">
-                <h5 class="mt-1 ms-2 h5 text-start " id="nombreZonaNavbar">Plano: </h5>
+                <div class="d-flex flex-row">
+                    <button class="btn">
+                        <i class="fa-regular fa-circle-xmark" data-bs-toggle="modal" data-bs-target="#añadirZonaModal" id="añadirZonaBoton"></i>
+                    </button>
+                    <h5 class="mt-1 ms-2 h5 text-start " id="nombrePlanoNavbar">Plano: </h5>
+                </div>
+
             </div>
             <div class="col-3">
                 <h5 class="mt-1 ms-2 h5 text-start " id="cantidadAPS">APs: </h5>
@@ -28,10 +35,12 @@
             <div class="col-3">
                 <h5 class="mt-1 ms-2 h5 text-start " id="cantidadIsletas">Isletas: </h5>
             </div>
-            <div class="col-3">
+            <div class="col-3 d-flex flex-row">
                 <h5 class="mt-1 ms-2 h5 text-start " id="cantidadEtiquetas">ETEs: </h5>
             </div>
+            
         </div>
+        
 
 
     </nav>
@@ -41,38 +50,35 @@
         <div class="containerIzquierda col-1 text-justify">
             <div class="d-flex flex-row" id="herramientas">
                 <div class="col-12">
-                    <div class="d-flex flex-column mt-2">
-                        <button class="btn btn-warning btnTool" data-bs-toggle="modal" data-bs-target="#añadirZonaModal"
-                            id="añadirZona">
-                            Zona <i class="fa-regular fa-map"></i>
-                        </button>
-                    </div>
                     <div class="d-flex flex-column ">
-                        <button type="button" class="btn btn-success btnTool mt-2" data-bs-toggle="modal"
-                            data-bs-target="#añadirIsletaModal" id="añadirIsleta">
+                        <button type="button" class="btn btnTool mt-2" data-bs-toggle="modal"
+                            data-bs-target="#añadirIsletaModal" id="añadirIsleta" >
                             Isleta <i class="fa-brands fa-codepen"></i>
                         </button>
                     </div>
                     <div class="d-flex flex-column ">
-                        <button type="button" class="btn btn-primary btnTool mt-2" id="añadirEtiqueta"
+                        <button type="button" class="btn btnTool mt-2" id="añadirEtiqueta"
                             data-bs-toggle="modal" data-bs-target="#añadirEtiquetaModal">
                             ETE <i class="fa-solid fa-ticket"></i>
                         </button>
                     </div>
                     <div class="d-flex flex-column ">
-                        <button type="button" class="btn btn-primary btnTool mt-2" id="añadirAP" data-bs-toggle="modal"
+                        <button type="button" class="btn btnTool mt-2" id="añadirAP" data-bs-toggle="modal"
                             data-bs-target="#añadirAPModal">
                             AP <i class="fa-solid fa-wifi"></i>
                         </button>
                     </div>
-                    <div class="d-flex flex-row mt-2 justify-content-between  ">
+                    <div class="d-flex mt-2 justify-content-between" id="moreTools">
                         <button class="btn activarEditado"><span><i class="fas fa-pencil-alt"></i></span> </button>
                         <button class="btn activarBorrado"><span><i class="fa-solid fa-eraser"></i></span></i></button>
                         <button class="btn activarBloqueo"><span><i class="fa-solid fa-lock"></i></span></button>
-                       
-                    </div >
+                    </div>
+                    <div class="d-flex mt-2 justify-content-between" id="plantillasTools">
+                        <button class="btn" id="planos"><span><i class="fa-regular fa-map"></i></span></i></button>
+                        <button class="btn"><span><i class="fa-solid fa-lock"></i></span></button>
+                        <button class="btn" id="maximixe"><i class="fa-solid fa-maximize"></i></button>
+                    </div>
                     <div class="d-flex flex-row mt-2">
-                        
                     </div>
 
 
@@ -80,13 +86,15 @@
             </div>
 
 
-            <div class="containerDerecha d-flex flex-column ">
+            <div class="containerDerecha d-flex flex-column">
 
             </div>
 
         </div>
         <div class="containerCentral col-11" id="containerAreas">
-            <div id="containerResize"> </div>
+            <div id="containerResize"> 
+                
+            </div>
 
 
         </div>
@@ -120,9 +128,11 @@
 
                             <div class="flex-row mt-2">
                                 <p>Tipo de Superficie</p>
-                                <input type="radio" id="superficieCuadrada" name="tipoSuperficie" value="cuadrada">
+                                <input type="radio" id="superficieCuadrada" name="tipoSuperficie" value="cuadrada"
+                                    required checked>
                                 <label for="superficieCuadrada">Rectangular</label><br>
-                                <input type="radio" id="superficieRedonda" name="tipoSuperficie" value="redonda">
+                                <input type="radio" id="superficieRedonda" name="tipoSuperficie" value="redonda"
+                                    required>
                                 <label for="superficieRedonda">Redonda</label><br>
                             </div>
 
@@ -243,6 +253,7 @@
     <script src="javascript/alertify.js"></script>
     <script src="javascript/alertify.min.js"></script>
     <script src="javascript/jquery.toast.min.js"></script>
+    <script src="javascript/sweetalert.js"></script>
 </body>
 
 </html>
